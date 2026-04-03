@@ -1,0 +1,18 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// This is your strict SQL Table for Contact Form Submissions
+model Lead {
+  id           Int      @id @default(autoincrement())
+  name         String
+  email        String
+  budget       String?  // The '?' means this field is optional
+  requirements String   @db.Text // Uses larger storage for long messages
+  createdAt    DateTime @default(now())
+}
