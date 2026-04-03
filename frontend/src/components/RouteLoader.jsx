@@ -1,27 +1,27 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 
 const RouteLoader = () => {
   const { pathname } = useLocation();
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const [isFirstLoad, setIsFirstLoad] = useState(true);
+  const isFirstLoad = useRef(true); // <-- Changed from useState to useRef
 
   useEffect(() => {
-    // Skip the heavy 3-second boot-up sequence on initial load
-    if (isFirstLoad) {
-      setIsFirstLoad(false);
+    // Skip the heavy initial boot-up sequence
+    if (isFirstLoad.current) {
+      isFirstLoad.current = false;
       return;
     }
 
     // Instantly trigger the split-screen mask on route change
     setIsTransitioning(true);
 
-    // 1.2s total duration for a smooth, majestic reveal
     const timer = setTimeout(() => setIsTransitioning(false), 1200);
     return () => clearTimeout(timer);
-  }, [pathname]);
+  }, [pathname]); // <-- No more warning!
 
   if (!isTransitioning) return null;
+  
 
   return (
     <div className="fixed inset-0 z-[9999] pointer-events-none overflow-hidden">
