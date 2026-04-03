@@ -1,0 +1,15 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100;300;400;600;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-black text-white m-0 p-0 overflow-x-hidden;
+  font-family: 'Outfit', sans-serif;
+}
+
+/* Custom glowing effects */
+.glow-text {
+  text-shadow: 0 0 40px rgba(192, 124, 65, 0.4);
+}
