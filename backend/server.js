@@ -1,8 +1,13 @@
 require('dotenv').config();
+
+// --- THE RENDER NETWORK FIX ---
+// Forces Node.js to use IPv4 instead of IPv6 to prevent ENETUNREACH timeouts
+require('dns').setDefaultResultOrder('ipv4first');
+
 const express = require('express');
 const cors = require('cors');
 const nodemailer = require('nodemailer');
-const { PrismaClient } = require('@prisma/client'); // <-- The new Postgres Engine
+const { PrismaClient } = require('@prisma/client'); 
 
 // Diagnostic Check 
 console.log("--- SYSTEM DIAGNOSTIC ---");
@@ -18,9 +23,11 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// --- EMAIL TRANSPORTER CONFIGURATION ---
+// --- EMAIL TRANSPORTER CONFIGURATION (Upgraded for Cloud) ---
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  host: 'smtp.gmail.com',
+  port: 465,
+  secure: true, // Use SSL
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
@@ -28,7 +35,7 @@ const transporter = nodemailer.createTransport({
 });
 
 transporter.verify((error) => {
-  if (error) console.log('⚠️ Email Transporter Error:', error);
+  if (error) console.log('⚠️ Email Transporter Error:', error.message);
   else console.log('✉️  Gmail Pipeline Ready');
 });
 
@@ -37,7 +44,6 @@ transporter.verify((error) => {
 // 1. Health Check
 app.get('/api/health', async (req, res) => {
   try {
-    // Quick ping to Postgres to ensure it's alive
     await prisma.$queryRaw`SELECT 1`;
     res.status(200).json({ status: 'active', database: 'connected', message: 'Zentry Engine is operational.' });
   } catch (error) {
@@ -54,7 +60,7 @@ app.post('/api/contact', async (req, res) => {
   }
 
   try {
-    // STEP 1: Save the lead to the PostgreSQL Database via Prisma
+    // STEP 1: Save the lead to Postgres
     const newLead = await prisma.lead.create({
       data: {
         name: name,
@@ -66,7 +72,7 @@ app.post('/api/contact', async (req, res) => {
 
     console.log(`✅ New lead saved to Postgres ID: ${newLead.id}`);
 
-    // STEP 2: Send the HTML Email to you
+    // STEP 2: Send the HTML Email
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: process.env.EMAIL_USER,
@@ -86,6 +92,7 @@ app.post('/api/contact', async (req, res) => {
     };
 
     await transporter.sendMail(mailOptions);
+    console.log(`✅ Email dispatched for Lead ID: ${newLead.id}`);
     
     res.status(200).json({ message: 'Directive transmitted securely.' });
     
