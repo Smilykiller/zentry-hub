@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Mail, MapPin, Phone, ArrowRight, Loader2, CheckCircle } from 'lucide-react';
 
 const Contact = () => {
-  // 1. Set up the State to hold the form data
+  // 1. State for form data
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -10,20 +10,21 @@ const Contact = () => {
     requirements: ''
   });
   
-  // 2. Set up the State to handle loading and success messages
+  // 2. State for UI feedback
   const [status, setStatus] = useState('idle'); // 'idle', 'loading', 'success', 'error'
 
-  // 3. Update state when user types
+  // 3. Handle input changes
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // 4. Send data to the Node.js backend when submitted
+  // 4. Submit payload to the Zentry Engine
   const handleSubmit = async (e) => {
     e.preventDefault();
     setStatus('loading');
 
     try {
+      // NOTE: When deploying to production, replace this with your live server URL
       const response = await fetch('http://localhost:5000/api/contact', {
         method: 'POST',
         headers: {
@@ -34,17 +35,24 @@ const Contact = () => {
 
       if (response.ok) {
         setStatus('success');
-        // Reset form after successful submission
-        setFormData({ name: '', email: '', budget: 'Academic Consultation (Student Rate)', requirements: '' });
+        // Clear the form fields
+        setFormData({ 
+          name: '', 
+          email: '', 
+          budget: 'Academic Consultation (Student Rate)', 
+          requirements: '' 
+        });
         
-        // Reset button back to normal after 3 seconds
+        // Reset the button state after 3 seconds
         setTimeout(() => setStatus('idle'), 3000);
       } else {
         setStatus('error');
+        setTimeout(() => setStatus('idle'), 3000);
       }
     } catch (error) {
-      console.error('Error sending message:', error);
+      console.error('Error transmitting directive:', error);
       setStatus('error');
+      setTimeout(() => setStatus('idle'), 3000);
     }
   };
 
@@ -111,7 +119,6 @@ const Contact = () => {
           <div className="lg:col-span-7 bg-white/[0.02] border border-white/5 p-8 md:p-12 rounded-2xl relative overflow-hidden">
             <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-zentry-copper to-zentry-slate"></div>
             
-            {/* Added onSubmit handler here */}
             <form onSubmit={handleSubmit} className="space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
