@@ -180,4 +180,38 @@ app.delete('/api/admin/comments/:id', async (req, res) => {
     res.status(500).json({ error: "Failed to delete comment" });
   }
 });
+// --- PUBLIC: Fetch all projects for the 'Work' page ---
+app.get('/api/projects', async (req, res) => {
+  try {
+    const projects = await prisma.project.findMany({
+      orderBy: { createdAt: 'desc' }
+    });
+    res.json(projects);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch projects" });
+  }
+});
+
+// --- ADMIN: Add a new project ---
+app.post('/api/admin/projects', async (req, res) => {
+  try {
+    const project = await prisma.project.create({
+      data: req.body
+    });
+    res.status(201).json(project);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to save project" });
+  }
+});
+
+// --- ADMIN: Delete a project ---
+app.delete('/api/admin/projects/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await prisma.project.delete({ where: { id: parseInt(id) } });
+    res.json({ message: "Project deleted" });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to delete project" });
+  }
+});
 module.exports = app;

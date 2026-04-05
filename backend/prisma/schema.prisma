@@ -23,3 +23,14 @@ model Comment {
   isApproved Boolean  @default(false) // Defaults to false so nothing goes live automatically
   createdAt  DateTime @default(now())
 }
+model Project {
+  id           Int      @id @default(autoincrement())
+  title        String
+  description  String   @db.Text
+  techStack    String   // We'll store this as a comma-separated string like "React, Node, Tailwind"
+  imageUrl     String   // Link to the project thumbnail
+  liveLink     String?  // Optional: Link to the hosted project
+  githubLink   String?  // Optional: Link to the repo
+  category     String   @default("Web Development") // e.g., "AI", "Game Dev", "Web"
+  createdAt    DateTime @default(now())
+}
