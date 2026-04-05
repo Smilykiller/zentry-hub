@@ -27,11 +27,15 @@ app.use(express.json());
 const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
   port: 465,
-  secure: true, // Use SSL
+  secure: true,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
+  // Add these three lines to prevent Serverless TLS timeouts:
+  pool: true,
+  maxConnections: 1,
+  maxMessages: 1,
 });
 
 transporter.verify((error) => {
