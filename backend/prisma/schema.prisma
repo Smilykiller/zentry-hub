@@ -16,3 +16,10 @@ model Lead {
   requirements String   @db.Text // Uses larger storage for long messages
   createdAt    DateTime @default(now())
 }
+model Comment {
+  id         Int      @id @default(autoincrement())
+  author     String
+  text       String
+  isApproved Boolean  @default(false) // Defaults to false so nothing goes live automatically
+  createdAt  DateTime @default(now())
+}

@@ -66,6 +66,14 @@ const Navbar = () => {
             <span className="absolute inset-0 bg-zentry-copper translate-y-[100%] group-hover:translate-y-0 transition-transform duration-500 ease-in-out"></span>
             <span className="relative z-10">INITIATE PROTOCOL</span>
           </Link>
+              {/* Add this right below your INITIATE button in the desktop menu */}
+          <Link 
+              to="/admin" 
+              className="ml-4 text-xs font-mono text-gray-800 hover:text-zentry-copper transition-colors duration-500"
+              title="Command Center"
+              >
+              [SYS]
+          </Link>
         </div>
       </div>
     </nav>

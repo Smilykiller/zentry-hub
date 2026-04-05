@@ -11,6 +11,7 @@ import Work from './pages/Work';
 import About from './pages/About';
 import Services from './pages/Services';
 import Testimonials from './pages/Testimonials';
+import AdminDashboard from './pages/AdminDashboard';
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
             <Route path="/about" element={<About />} />
             <Route path="/testimonials" element={<Testimonials />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/admin" element={<AdminDashboard />} />
           </Routes>
         </main>
 

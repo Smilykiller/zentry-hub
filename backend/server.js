@@ -116,4 +116,68 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 // CRITICAL FOR VERCEL: Export the Express API for Serverless execution
+// --- PUBLIC ROUTE: Submit a new comment (Goes to queue) ---
+app.post('/api/comments', async (req, res) => {
+  try {
+    const { author, text } = req.body;
+    const newComment = await prisma.comment.create({
+      data: { author, text } // isApproved automatically defaults to false
+    });
+    res.status(201).json({ message: "Comment queued for review", comment: newComment });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to submit comment" });
+  }
+});
+
+// --- PUBLIC ROUTE: Fetch ONLY approved comments ---
+app.get('/api/comments', async (req, res) => {
+  try {
+    const approvedComments = await prisma.comment.findMany({
+      where: { isApproved: true },
+      orderBy: { createdAt: 'desc' }
+    });
+    res.status(200).json(approvedComments);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch comments" });
+  }
+});
+
+// --- ADMIN ROUTE: Fetch ALL comments (Queue + Approved) ---
+app.get('/api/admin/comments', async (req, res) => {
+  try {
+    const allComments = await prisma.comment.findMany({
+      orderBy: { createdAt: 'desc' }
+    });
+    res.status(200).json(allComments);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch admin data" });
+  }
+});
+
+// --- ADMIN ROUTE: Approve a comment ---
+app.patch('/api/admin/comments/:id/approve', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updatedComment = await prisma.comment.update({
+      where: { id: parseInt(id) },
+      data: { isApproved: true }
+    });
+    res.status(200).json(updatedComment);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to approve comment" });
+  }
+});
+
+// --- ADMIN ROUTE: Delete a comment (Trash it) ---
+app.delete('/api/admin/comments/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await prisma.comment.delete({
+      where: { id: parseInt(id) }
+    });
+    res.status(200).json({ message: "Target eliminated" });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to delete comment" });
+  }
+});
 module.exports = app;
