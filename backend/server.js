@@ -78,7 +78,7 @@ app.post('/api/contact', async (req, res) => {
 
     // STEP 2: Send the HTML Email
     const mailOptions = {
-      from: process.env.EMAIL_USER,
+      from: `"${name} (Zentry Hub)" <${process.env.EMAIL_USER}>`,
       to: process.env.EMAIL_USER,
       replyTo: email,
       subject: `Zentry Hub Lead: ${name} - ${budget || 'Unspecified Budget'}`,
