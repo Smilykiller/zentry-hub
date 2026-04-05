@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, LogIn } from 'lucide-react';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -34,13 +34,9 @@ const Navbar = () => {
                 <span className="relative z-10">INITIATE</span>
               </Link>
 
-              {/* THE FIX: Stealth Admin Button moved here for Desktop! */}
-              <Link 
-                to="/admin" 
-                className="ml-4 text-xs font-mono text-gray-800 hover:text-zentry-copper transition-colors duration-500"
-                title="Command Center"
-              >
-                [SYS]
+              <Link to="/admin" className="ml-4 flex items-center gap-2 text-sm font-medium tracking-widest text-gray-400 hover:text-white transition-colors duration-300">
+              <LogIn className="w-4 h-4" />
+                LOGIN
               </Link>
             </div>
           </div>
