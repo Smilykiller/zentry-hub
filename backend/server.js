@@ -102,8 +102,14 @@ app.post('/api/contact', async (req, res) => {
   }
 });
 
-// Start the Engine
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`🚀 Zentry Hub Architecture [PostgreSQL Edition] running on port ${PORT}`);
-});
+// --- START THE ENGINE ---
+// If running locally on your laptop, use app.listen
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`🚀 Zentry Hub Architecture [PostgreSQL Edition] running locally on port ${PORT}`);
+  });
+}
+
+// CRITICAL FOR VERCEL: Export the Express API for Serverless execution
+module.exports = app;
