@@ -1,15 +1,11 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, X } from 'lucide-react'; // Added these icons for the mobile menu
+import { Menu, X } from 'lucide-react';
 
 const Navbar = () => {
-  // 1. Add state to control the mobile menu
   const [isOpen, setIsOpen] = useState(false);
 
-  // 2. Function to toggle the menu
   const toggleMenu = () => setIsOpen(!isOpen);
-
-  // 3. Function to close the menu when a link is clicked
   const closeMenu = () => setIsOpen(false);
 
   return (
@@ -32,10 +28,21 @@ const Navbar = () => {
             <Link to="/about" className="hover:text-white transition-colors duration-300">AGENCY</Link>
             <Link to="/testimonials" className="hover:text-white transition-colors duration-300">CLIENTS</Link>
             
-            <Link to="/contact" className="relative group px-6 py-2 overflow-hidden border border-zentry-copper/50 rounded-full text-zentry-copper hover:text-black transition-all duration-500">
-              <span className="absolute inset-0 bg-zentry-copper translate-y-[100%] group-hover:translate-y-0 transition-transform duration-500 ease-in-out"></span>
-              <span className="relative z-10">INITIATE</span>
-            </Link>
+            <div className="flex items-center">
+              <Link to="/contact" className="relative group px-6 py-2 overflow-hidden border border-zentry-copper/50 rounded-full text-zentry-copper hover:text-black transition-all duration-500">
+                <span className="absolute inset-0 bg-zentry-copper translate-y-[100%] group-hover:translate-y-0 transition-transform duration-500 ease-in-out"></span>
+                <span className="relative z-10">INITIATE</span>
+              </Link>
+
+              {/* THE FIX: Stealth Admin Button moved here for Desktop! */}
+              <Link 
+                to="/admin" 
+                className="ml-4 text-xs font-mono text-gray-800 hover:text-zentry-copper transition-colors duration-500"
+                title="Command Center"
+              >
+                [SYS]
+              </Link>
+            </div>
           </div>
 
           {/* Mobile Hamburger Button (Hidden on desktop) */}
@@ -66,13 +73,10 @@ const Navbar = () => {
             <span className="absolute inset-0 bg-zentry-copper translate-y-[100%] group-hover:translate-y-0 transition-transform duration-500 ease-in-out"></span>
             <span className="relative z-10">INITIATE PROTOCOL</span>
           </Link>
-              {/* Add this right below your INITIATE button in the desktop menu */}
-          <Link 
-              to="/admin" 
-              className="ml-4 text-xs font-mono text-gray-800 hover:text-zentry-copper transition-colors duration-500"
-              title="Command Center"
-              >
-              [SYS]
+          
+          {/* Optional: A mobile version of the stealth button at the very bottom */}
+          <Link to="/admin" onClick={closeMenu} className="mt-4 text-xs font-mono text-gray-800 hover:text-zentry-copper transition-colors">
+            [SYS]
           </Link>
         </div>
       </div>
