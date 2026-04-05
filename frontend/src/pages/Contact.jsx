@@ -25,7 +25,7 @@ const Contact = () => {
 
     try {
       // NOTE: When deploying to production, replace this with your live server URL
-      const response = await fetch('https://zentry-engine.onrender.com/api/contact', {
+      const response = await fetch('https://zentry-hub-backend.vercel.app/api/contact', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
