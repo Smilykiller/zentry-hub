@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { Lock, ShieldAlert, FolderGit2, MessageSquare, Plus, Trash2, ExternalLink } from 'lucide-react';
-
+import { Lock, ShieldAlert, FolderGit2, MessageSquare, Plus, Trash2, ExternalLink, Star } from 'lucide-react';
 const AdminDashboard = () => {
   // --- SECURITY STATE ---
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -260,34 +259,82 @@ const AdminDashboard = () => {
         {/* TAB 2: COMMENT MODERATION */}
         {/* ============================== */}
         {activeTab === 'comments' && (
-           <div className="space-y-4">
-           {comments.length === 0 ? (
-             <p className="text-gray-500 font-mono tracking-widest text-center py-10 border border-dashed border-white/10 rounded-lg">
-               [ NO REVIEWS IN QUEUE ]
-             </p>
-           ) : (
-             comments.map((comment) => (
-               <div key={comment.id} className="p-6 border border-white/5 rounded-lg bg-white/[0.02] flex flex-col md:flex-row justify-between items-start md:items-center gap-6 hover:border-white/10 transition-colors">
-                 <div>
-                   <p className="font-bold text-gray-200 tracking-wider mb-1">{comment.author}</p>
-                   <p className="text-gray-400 font-light leading-relaxed">"{comment.text}"</p>
-                   <span className={`inline-block mt-3 px-3 py-1 text-xs font-mono tracking-widest rounded border ${comment.isApproved ? 'bg-green-900/20 text-green-400 border-green-900/50' : 'bg-yellow-900/20 text-yellow-400 border-yellow-900/50'}`}>
-                     {comment.isApproved ? "STATUS: LIVE" : "STATUS: PENDING REVIEW"}
-                   </span>
-                 </div>
-                 <div className="flex gap-3 w-full md:w-auto">
-                   {!comment.isApproved && (
-                     <button onClick={() => approveComment(comment.id)} className="flex-1 md:flex-none px-6 py-2 bg-green-600/10 text-green-400 border border-green-600/30 rounded hover:bg-green-600 hover:text-black font-mono tracking-widest transition-all text-xs">
-                       APPROVE
-                     </button>
-                   )}
-                   <button onClick={() => deleteComment(comment.id)} className="flex-1 md:flex-none px-6 py-2 bg-red-600/10 text-red-400 border border-red-600/30 rounded hover:bg-red-600 hover:text-black font-mono tracking-widest transition-all text-xs">
-                     DELETE
-                   </button>
-                 </div>
-               </div>
-             ))
-           )}
+           <div className="space-y-6">
+            
+            {/* PRE-WRITTEN / VERIFIED FEEDBACKS (Always Live) */}
+            <div className="mb-8">
+              <h2 className="text-xl font-bold tracking-widest mb-6 text-white border-b border-white/10 pb-4">VERIFIED CLIENT REVIEWS</h2>
+              <div className="space-y-4">
+                {[
+                  { id: 'pre-1', author: 'Sarah Jenkins', role: 'CEO, TechFlow', text: 'Zentry Hub completely engineered our backend architecture. The latency drop was incredible.', rating: 5 },
+                  { id: 'pre-2', author: 'Marcus Wright', role: 'Lead Designer', text: 'The visual portfolio they deployed for my studio is converting clients at 3x the previous rate.', rating: 5 },
+                  { id: 'pre-3', author: 'Dr. Emily Chen', role: 'Medical Researcher', text: 'Their implementation of the Diabetic Retinopathy detection model was flawless and highly scalable.', rating: 5 }
+                ].map((review) => (
+                  <div key={review.id} className="p-6 border border-zentry-copper/30 rounded-lg bg-zentry-copper/[0.02] flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-1 h-full bg-zentry-copper"></div>
+                    <div>
+                      <div className="flex items-center gap-3 mb-1">
+                        <p className="font-bold text-gray-200 tracking-wider">{review.author}</p>
+                        <span className="text-gray-500 font-mono text-xs">| {review.role}</span>
+                      </div>
+                      
+                      {/* Star Rating Engine */}
+                      <div className="flex gap-1 mb-3">
+                        {[...Array(review.rating)].map((_, i) => (
+                          <Star key={i} className="w-4 h-4 fill-zentry-copper text-zentry-copper" />
+                        ))}
+                      </div>
+
+                      <p className="text-gray-400 font-light leading-relaxed">"{review.text}"</p>
+                      <span className="inline-block mt-3 px-3 py-1 text-xs font-mono tracking-widest rounded border bg-green-900/20 text-green-400 border-green-900/50">
+                        STATUS: LIVE (PRE-VERIFIED)
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* LIVE USER DATABASE QUEUE */}
+            <h2 className="text-xl font-bold tracking-widest mb-6 text-white border-b border-white/10 pb-4">PUBLIC SUBMISSION QUEUE</h2>
+            
+            <div className="space-y-4">
+              {comments.length === 0 ? (
+                <p className="text-gray-500 font-mono tracking-widest text-center py-10 border border-dashed border-white/10 rounded-lg">
+                  [ NO NEW PUBLIC REVIEWS IN QUEUE ]
+                </p>
+              ) : (
+                comments.map((comment) => (
+                  <div key={comment.id} className="p-6 border border-white/5 rounded-lg bg-white/[0.02] flex flex-col md:flex-row justify-between items-start md:items-center gap-6 hover:border-white/10 transition-colors">
+                    <div>
+                      <p className="font-bold text-gray-200 tracking-wider mb-1">{comment.author}</p>
+                      
+                      {/* Dynamic Star Rating for Public Comments */}
+                      <div className="flex gap-1 mb-3">
+                        {[...Array(comment.rating || 5)].map((_, i) => (
+                          <Star key={i} className="w-4 h-4 fill-zentry-copper text-zentry-copper" />
+                        ))}
+                      </div>
+
+                      <p className="text-gray-400 font-light leading-relaxed">"{comment.text}"</p>
+                      <span className={`inline-block mt-3 px-3 py-1 text-xs font-mono tracking-widest rounded border ${comment.isApproved ? 'bg-green-900/20 text-green-400 border-green-900/50' : 'bg-yellow-900/20 text-yellow-400 border-yellow-900/50'}`}>
+                        {comment.isApproved ? "STATUS: LIVE" : "STATUS: PENDING REVIEW"}
+                      </span>
+                    </div>
+                    <div className="flex gap-3 w-full md:w-auto">
+                      {!comment.isApproved && (
+                        <button onClick={() => approveComment(comment.id)} className="flex-1 md:flex-none px-6 py-2 bg-green-600/10 text-green-400 border border-green-600/30 rounded hover:bg-green-600 hover:text-black font-mono tracking-widest transition-all text-xs">
+                          APPROVE
+                        </button>
+                      )}
+                      <button onClick={() => deleteComment(comment.id)} className="flex-1 md:flex-none px-6 py-2 bg-red-600/10 text-red-400 border border-red-600/30 rounded hover:bg-red-600 hover:text-black font-mono tracking-widest transition-all text-xs">
+                        DELETE
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
          </div>
         )}
 
