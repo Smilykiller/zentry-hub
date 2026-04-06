@@ -6,11 +6,12 @@ require('dns').setDefaultResultOrder('ipv4first');
 
 const express = require('express');
 const cors = require('cors');
+app.use(cors());
 const nodemailer = require('nodemailer');
 const { PrismaClient } = require('@prisma/client'); 
 const cors = require('cors');
 // This tells Vercel to accept data from anywhere
-app.use(cors());
+
 
 // Diagnostic Check 
 console.log("--- SYSTEM DIAGNOSTIC ---");

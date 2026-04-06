@@ -4,11 +4,12 @@ import { Star, Quote, MessageSquarePlus, CheckCircle } from 'lucide-react';
 const Testimonials = () => {
   // 1. React State for Database Data and Form Inputs
   const [liveReviews, setLiveReviews] = useState([]);
-  const [formData, setFormData] = useState({ name: '', project: '', text: '' });
+  // ADDED: rating state defaulted to 5
+  const [formData, setFormData] = useState({ name: '', project: '', text: '', rating: 5 });
   const [status, setStatus] = useState('idle'); // idle, submitting, success, error
 
   // The Vercel API URL (Make sure to paste your actual URL here!)
-  const API_URL = "https://your-vercel-url.vercel.app/api";
+  const API_URL = "https://zentry-hub-backend.vercel.app/api";
 
   // 2. Fetch only APPROVED reviews when the page loads
   useEffect(() => {
@@ -27,7 +28,8 @@ const Testimonials = () => {
       // Formatting the data to match our Prisma Schema
       const payload = {
         author: `${formData.name} | ${formData.project}`,
-        text: formData.text
+        text: formData.text,
+        rating: formData.rating // ADDED: Transmitting the stars to the vault
       };
 
       await fetch(`${API_URL}/comments`, {
@@ -37,7 +39,8 @@ const Testimonials = () => {
       });
 
       setStatus('success');
-      setFormData({ name: '', project: '', text: '' }); // Clear the form
+      // Clear the form and reset stars to 5
+      setFormData({ name: '', project: '', text: '', rating: 5 }); 
       
       // Reset success message after 5 seconds
       setTimeout(() => setStatus('idle'), 5000);
@@ -78,8 +81,8 @@ const Testimonials = () => {
                 <Quote className="absolute top-8 right-8 w-12 h-12 text-white/5 group-hover:text-zentry-copper/10 transition-colors duration-500" />
                 
                 <div className="flex gap-1 mb-6">
-                  {/* Defaulting to 5 stars for all approved DB comments */}
-                  {[...Array(5)].map((_, i) => (
+                  {/* Dynamic Stars: If db has rating use it, else default to 5 */}
+                  {[...Array(review.rating || 5)].map((_, i) => (
                     <Star key={i} className="w-5 h-5 fill-zentry-copper text-zentry-copper" />
                   ))}
                 </div>
@@ -89,7 +92,6 @@ const Testimonials = () => {
                 </p>
                 
                 <div className="border-t border-white/10 pt-6 mt-auto">
-                  {/* We split the author string to show Name and Project separately */}
                   <h4 className="text-white font-medium text-lg">{review.author.split(' | ')[0]}</h4>
                   <p className="text-zentry-copper text-sm font-mono tracking-wider uppercase mt-1">
                     Project: {review.author.split(' | ')[1] || "Consulting"}
@@ -133,6 +135,26 @@ const Testimonials = () => {
                   className="w-full bg-black/50 border border-white/10 rounded-md px-4 py-3 text-white focus:outline-none focus:border-zentry-copper transition-colors" 
                   placeholder="e.g., E-commerce Platform" 
                 />
+              </div>
+            </div>
+
+            {/* ========================================= */}
+            {/* THE NEW INTERACTIVE STAR RATING ENGINE */}
+            {/* ========================================= */}
+            <div>
+              <label className="block text-sm font-mono text-gray-500 mb-3 uppercase tracking-widest">Project Rating</label>
+              <div className="flex gap-2">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <Star 
+                    key={star}
+                    onClick={() => setFormData({ ...formData, rating: star })}
+                    className={`w-8 h-8 cursor-pointer transition-all duration-300 ${
+                      formData.rating >= star 
+                        ? 'fill-zentry-copper text-zentry-copper hover:scale-110' 
+                        : 'text-gray-600 hover:text-gray-400 hover:scale-110'
+                    }`} 
+                  />
+                ))}
               </div>
             </div>
             

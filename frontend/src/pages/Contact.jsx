@@ -1,6 +1,12 @@
 import React, { useState } from 'react';
 import { Mail, MapPin, Phone, ArrowRight, Loader2, CheckCircle } from 'lucide-react';
 
+const [formData, setFormData] = useState({ 
+  name: '', 
+  project: '', 
+  review: '', 
+  rating: 5 // <-- NEW RATING STATE
+});
 const Contact = () => {
   // 1. State for form data
   const [formData, setFormData] = useState({
