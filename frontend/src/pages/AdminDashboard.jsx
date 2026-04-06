@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { Lock, ShieldAlert, FolderGit2, MessageSquare, Plus, Trash2, ExternalLink, Star } from 'lucide-react';
-const AdminDashboard = () => {
+import { Lock, ShieldAlert, FolderGit2, MessageSquare, Plus, Trash2, ExternalLink, Star } from 'lucide-react';const AdminDashboard = () => {
   // --- SECURITY STATE ---
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [passcode, setPasscode] = useState('');
