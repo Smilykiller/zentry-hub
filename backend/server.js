@@ -6,12 +6,8 @@ require('dns').setDefaultResultOrder('ipv4first');
 
 const express = require('express');
 const cors = require('cors');
-app.use(cors());
 const nodemailer = require('nodemailer');
 const { PrismaClient } = require('@prisma/client'); 
-const cors = require('cors');
-// This tells Vercel to accept data from anywhere
-
 
 // Diagnostic Check 
 console.log("--- SYSTEM DIAGNOSTIC ---");
@@ -19,13 +15,25 @@ console.log("Loaded Email:", process.env.EMAIL_USER);
 console.log("Loaded Password Length:", process.env.EMAIL_PASS ? process.env.EMAIL_PASS.length : "UNDEFINED");
 console.log("-------------------------");
 
-// Initialize Prisma
+// Initialize Prisma & Express Engine
 const prisma = new PrismaClient();
 const app = express();
 
-// Middleware
-app.use(cors());
+// =======================================================
+// THE ULTIMATE CORS CONFIGURATION (VERCEL PREFLIGHT FIX)
+// =======================================================
+app.use(cors({
+  origin: '*', // Allows requests from your frontend
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'], // Critical: Added OPTIONS and PATCH
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+// Explicit Preflight Handler (Stops Vercel from redirecting OPTIONS requests)
+app.options('*', cors());
+
+// Body Parsing Middleware
 app.use(express.json());
+// =======================================================
 
 // --- EMAIL TRANSPORTER CONFIGURATION (Upgraded for Cloud) ---
 const transporter = nodemailer.createTransport({
@@ -36,7 +44,6 @@ const transporter = nodemailer.createTransport({
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
-  // Add these three lines to prevent Serverless TLS timeouts:
   pool: true,
   maxConnections: 1,
   maxMessages: 1,
@@ -184,6 +191,7 @@ app.delete('/api/admin/comments/:id', async (req, res) => {
     res.status(500).json({ error: "Failed to delete comment" });
   }
 });
+
 // --- PUBLIC: Fetch all projects for the 'Work' page ---
 app.get('/api/projects', async (req, res) => {
   try {
@@ -218,4 +226,5 @@ app.delete('/api/admin/projects/:id', async (req, res) => {
     res.status(500).json({ error: "Failed to delete project" });
   }
 });
+
 module.exports = app;
