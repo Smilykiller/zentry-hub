@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
-import { Lock, ShieldAlert, FolderGit2, MessageSquare, Plus, Trash2, ExternalLink, Star } from 'lucide-react';const AdminDashboard = () => {
+import { Lock, ShieldAlert, FolderGit2, MessageSquare, Plus, Trash2, ExternalLink, Star } from 'lucide-react';
+
+const AdminDashboard = () => {
   // --- SECURITY STATE ---
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [passcode, setPasscode] = useState('');
   const [authError, setAuthError] = useState(false);
   const MASTER_KEY = "ZENTRY2026";
 
-  // Replace with your Vercel URL!
-  const API_URL = "https://zentry-hub-backend.vercel.app//api"; 
+  // FIXED: Removed the double slash before /api
+  const API_URL = "https://zentry-hub-backend.vercel.app/api"; 
 
   // --- DASHBOARD STATE ---
   const [activeTab, setActiveTab] = useState('projects'); // 'projects' or 'comments'
