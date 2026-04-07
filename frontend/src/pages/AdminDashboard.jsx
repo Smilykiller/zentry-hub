@@ -36,21 +36,42 @@ const AdminDashboard = () => {
     }
   };
 
-  // --- API FETCHERS ---
+ // --- API FETCHERS ---
   const fetchComments = () => {
     fetch(`${API_URL}/admin/comments`)
       .then(res => res.json())
-      .then(data => setComments(data))
-      .catch(err => console.error("Comment fetch failed", err));
+      .then(data => {
+        // DEFENSIVE CHECK: Is it actually an array?
+        if (Array.isArray(data)) {
+          setComments(data);
+        } else {
+          console.error("Backend sent an error instead of an array:", data);
+          setComments([]); // Fallback to empty array to prevent .map crashes
+        }
+      })
+      .catch(err => {
+        console.error("Comment fetch failed", err);
+        setComments([]);
+      });
   };
 
   const fetchProjects = () => {
     fetch(`${API_URL}/projects`)
       .then(res => res.json())
-      .then(data => setProjects(data))
-      .catch(err => console.error("Project fetch failed", err));
+      .then(data => {
+        // DEFENSIVE CHECK: Is it actually an array?
+        if (Array.isArray(data)) {
+          setProjects(data);
+        } else {
+          console.error("Backend sent an error instead of an array:", data);
+          setProjects([]); // Fallback to empty array to prevent .map crashes
+        }
+      })
+      .catch(err => {
+        console.error("Project fetch failed", err);
+        setProjects([]);
+      });
   };
-
   // --- COMMENT ACTIONS ---
   const approveComment = async (id) => {
     await fetch(`${API_URL}/admin/comments/${id}/approve`, { method: 'PATCH' });
