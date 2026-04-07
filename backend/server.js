@@ -29,7 +29,7 @@ app.use(cors({
 }));
 
 // Explicit Preflight Handler (Stops Vercel from redirecting OPTIONS requests)
-app.options('*', cors());
+app.options(/(.*)/, cors());
 
 // Body Parsing Middleware
 app.use(express.json());
