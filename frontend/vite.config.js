@@ -1,12 +1,12 @@
 import { defineConfig } from 'vite'
-import react    from '@vitejs/plugin-react'
+import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
-import path     from 'path'
+import path from 'path'
 
 export default defineConfig({
   plugins: [
     react(),
-    tailwindcss(),   // Tailwind v4 uses a Vite plugin, not PostCSS
+    tailwindcss(), // Tailwind v4 uses a Vite plugin, not PostCSS
   ],
   resolve: {
     alias: {
@@ -26,11 +26,23 @@ export default defineConfig({
     outDir: 'dist',
     rollupOptions: {
       output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom'],
-          router: ['react-router-dom'],
-          motion: ['framer-motion'],
-          query:  ['@tanstack/react-query'],
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('react-router-dom')) {
+              return 'router';
+            }
+            if (id.includes('framer-motion')) {
+              return 'motion';
+            }
+            if (id.includes('@tanstack/react-query')) {
+              return 'query';
+            }
+            if (id.includes('react') || id.includes('react-dom')) {
+              return 'vendor';
+            }
+            // Optional: bundle all other small dependencies into a general vendor chunk
+            return 'deps'; 
+          }
         },
       },
     },
