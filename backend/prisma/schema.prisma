@@ -1,3 +1,5 @@
+// Zentry Hub — Prisma 6 Schema
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -7,30 +9,53 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// This is your strict SQL Table for Contact Form Submissions
-model Lead {
-  id           Int      @id @default(autoincrement())
-  name         String
-  email        String
-  budget       String?  // The '?' means this field is optional
-  requirements String   @db.Text // Uses larger storage for long messages
-  createdAt    DateTime @default(now())
-}
-model Comment {
-  id         Int      @id @default(autoincrement())
-  author     String
-  text       String
-  isApproved Boolean  @default(false) // Defaults to false so nothing goes live automatically
-  createdAt  DateTime @default(now())
-}
 model Project {
+  id            Int      @id @default(autoincrement())
+  title         String
+  category      String
+  description   String
+  tech_stack    String[]
+  image_url     String
+  live_url      String?
+  github_url    String?
+  is_featured   Boolean  @default(false)
+  display_order Int      @default(0)
+  created_at    DateTime @default(now())
+
+  @@map("projects")
+}
+
+model Testimonial {
   id           Int      @id @default(autoincrement())
-  title        String
-  description  String   @db.Text
-  techStack    String   // We'll store this as a comma-separated string like "React, Node, Tailwind"
-  imageUrl     String   // Link to the project thumbnail
-  liveLink     String?  // Optional: Link to the hosted project
-  githubLink   String?  // Optional: Link to the repo
-  category     String   @default("Web Development") // e.g., "AI", "Game Dev", "Web"
-  createdAt    DateTime @default(now())
+  author_name  String
+  project_name String
+  review_text  String
+  rating       Int      @default(5)
+  is_approved  Boolean  @default(false)
+  created_at   DateTime @default(now())
+
+  @@map("testimonials")
+}
+
+model Lead {
+  id         Int      @id @default(autoincrement())
+  name       String
+  email      String
+  service    String
+  budget     String
+  message    String
+  is_read    Boolean  @default(false)
+  created_at DateTime @default(now())
+
+  @@map("leads")
+}
+
+model AdminUser {
+  id            Int       @id @default(autoincrement())
+  email         String    @unique
+  password_hash String
+  created_at    DateTime  @default(now())
+  last_login    DateTime?
+
+  @@map("admin_users")
 }

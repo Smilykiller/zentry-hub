@@ -1,198 +1,289 @@
-import React, { useState } from 'react';
-import { Mail, MapPin, Phone, ArrowRight, Loader2, CheckCircle } from 'lucide-react';
+import React, { useState } from 'react'
+import { Helmet } from 'react-helmet-async'
+import { motion } from 'framer-motion'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { contactSchema } from '@/utils/validators'
+import { contactApi } from '@/services/contactApi'
+import { ArrowUpRight, CheckCircle, MapPin, Mail, MessageSquare } from 'lucide-react'
 
-const Contact = () => {
-  // 1. State for form data
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    budget: 'Academic Consultation (Student Rate)',
-    requirements: ''
-  });
-  
-  // 2. State for UI feedback
-  const [status, setStatus] = useState('idle'); // 'idle', 'loading', 'success', 'error'
+const fadeUp = {
+  hidden:  { opacity:0, y:36 },
+  visible: (i=0) => ({ opacity:1, y:0, transition:{ duration:0.7, delay:i*0.1, ease:[0.16,1,0.3,1] } })
+}
 
-  // 3. Handle input changes
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+const services = [
+  'Full-Stack Web Engineering',
+  'AI & Machine Learning',
+  'Specialised Domain Systems',
+  'Data Architecture',
+  'Technical Consulting',
+  'Maintenance & Support',
+  'Not sure yet',
+]
 
-  // 4. Submit payload to the Zentry Engine
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setStatus('loading');
+const budgets = [
+  'Under ₹50,000',
+  '₹50,000 – ₹2,00,000',
+  '₹2,00,000 – ₹5,00,000',
+  '₹5,00,000+',
+  'Let\'s discuss',
+]
 
+const inputStyle = {
+  width:'100%',
+  background:'#0D1117',
+  border:'1px solid #2A3446',
+  color:'#F0EDE8',
+  padding:'16px 20px',
+  fontFamily:"'Space Grotesk',sans-serif",
+  fontSize:15, fontWeight:400,
+  outline:'none',
+  transition:'border-color 0.2s',
+  borderRadius:0,
+  appearance:'none',
+}
+
+export default function Contact() {
+  const [submitted, setSubmitted] = useState(false)
+  const [serverError, setServerError] = useState('')
+
+  const { register, handleSubmit, formState:{ errors, isSubmitting } } = useForm({
+    resolver: zodResolver(contactSchema),
+  })
+
+  const onSubmit = async (data) => {
     try {
-      // NOTE: When deploying to production, replace this with your live server URL
-      const response = await fetch('https://zentry-hub-backend.vercel.app/api/contact', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (response.ok) {
-        setStatus('success');
-        // Clear the form fields
-        setFormData({ 
-          name: '', 
-          email: '', 
-          budget: 'Academic Consultation (Student Rate)', 
-          requirements: '' 
-        });
-        
-        // Reset the button state after 3 seconds
-        setTimeout(() => setStatus('idle'), 3000);
-      } else {
-        setStatus('error');
-        setTimeout(() => setStatus('idle'), 3000);
-      }
-    } catch (error) {
-      console.error('Error transmitting directive:', error);
-      setStatus('error');
-      setTimeout(() => setStatus('idle'), 3000);
+      setServerError('')
+      await contactApi.submit(data)
+      setSubmitted(true)
+    } catch (e) {
+      setServerError(e?.response?.data?.error || 'Something went wrong. Please try again.')
     }
-  };
+  }
 
   return (
-    <div className="min-h-screen bg-zentry-dark pt-32 pb-24 px-6 relative overflow-hidden">
-      
-      {/* Background Ambient Glow */}
-      <div className="absolute top-[20%] right-[10%] w-[50vw] h-[50vw] bg-zentry-copper/10 rounded-full blur-[150px] pointer-events-none"></div>
+    <>
+      <Helmet>
+        <title>Contact — Zentry Hub</title>
+        <meta name="description" content="Start a project with Zentry Hub. Tell us what you're building." />
+      </Helmet>
 
-      <div className="max-w-7xl mx-auto relative z-10">
-        
-        {/* Header Section */}
-        <div className="mb-20 text-center md:text-left">
-          <p className="text-zentry-copper tracking-[0.3em] text-sm font-semibold mb-4 uppercase">Initiate Protocol</p>
-          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tighter text-white mb-6">
-            ARCHITECT YOUR <br className="hidden md:block"/>
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-zentry-copper to-zentry-slate">
-              NEXT SYSTEM.
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@300;400;500;600;700&family=Fragment+Mono&family=DM+Serif+Display:ital@0;1&display=swap');
+        input:focus,select:focus,textarea:focus{ border-color:rgba(184,115,51,0.6)!important; }
+        input::placeholder,textarea::placeholder{ color:#2A3446; }
+        select option{ background:#161B22; color:#F0EDE8; }
+        @media(max-width:900px){ .contact-grid{ grid-template-columns:1fr!important; } }
+      `}</style>
+
+      {/* HERO */}
+      <section style={{
+        minHeight:'55vh', background:'#0D1117',
+        display:'flex', flexDirection:'column', justifyContent:'flex-end',
+        padding:'120px 2.5rem 80px', position:'relative', overflow:'hidden',
+      }}>
+        <div style={{
+          position:'absolute', bottom:-60, right:-40,
+          fontFamily:"'Bebas Neue',sans-serif",
+          fontSize:'clamp(140px,28vw,380px)',
+          color:'rgba(74,111,165,0.04)',
+          lineHeight:1, userSelect:'none', pointerEvents:'none',
+          letterSpacing:'-0.05em',
+        }}>TALK</div>
+
+        <div style={{ maxWidth:1280, margin:'0 auto', width:'100%' }}>
+          <motion.p variants={fadeUp} initial="hidden" animate="visible" custom={0}
+            style={{ fontFamily:"'Fragment Mono',monospace", fontSize:11, color:'#B87333', letterSpacing:'0.25em', textTransform:'uppercase', marginBottom:24 }}>
+            Get in touch
+          </motion.p>
+          <motion.h1 variants={fadeUp} initial="hidden" animate="visible" custom={1}
+            style={{
+              fontFamily:"'Bebas Neue',sans-serif",
+              fontSize:'clamp(64px,12vw,160px)',
+              letterSpacing:'-0.02em', lineHeight:0.9, color:'#F0EDE8', marginBottom:40,
+            }}>
+            Let's build<br/>
+            <span style={{ fontFamily:"'DM Serif Display',serif", fontStyle:'italic', color:'#B87333' }}>
+              something real.
             </span>
-          </h1>
-          <p className="text-gray-400 text-lg md:text-xl max-w-2xl font-light">
-            Secure a consultation. Detail your operational requirements, and we will engineer the architecture to support it.
-          </p>
+          </motion.h1>
         </div>
+      </section>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
-          
-          {/* Left Side: Contact Information */}
-          <div className="lg:col-span-5 flex flex-col justify-center space-y-12">
-            
-            <div className="group flex items-start space-x-6">
-              <div className="bg-white/[0.02] border border-white/10 p-4 rounded-xl group-hover:border-zentry-copper/50 transition-colors duration-500">
-                <Mail className="text-zentry-copper w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="text-sm font-mono text-gray-500 tracking-widest uppercase mb-1">Direct Comms</h3>
-                <p className="text-xl font-medium text-white">hello@zentryhub.com</p>
-              </div>
-            </div>
+      {/* MAIN CONTENT */}
+      <section style={{ background:'#0D1117', padding:'0 2.5rem 140px', borderTop:'1px solid #2A3446' }}>
+        <div style={{ maxWidth:1280, margin:'0 auto' }}>
+          <div className="contact-grid" style={{ display:'grid', gridTemplateColumns:'1fr 1.6fr', gap:80, paddingTop:80 }}>
 
-            <div className="group flex items-start space-x-6">
-              <div className="bg-white/[0.02] border border-white/10 p-4 rounded-xl group-hover:border-zentry-copper/50 transition-colors duration-500">
-                <MapPin className="text-zentry-slate w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="text-sm font-mono text-gray-500 tracking-widest uppercase mb-1">Headquarters</h3>
-                <p className="text-xl font-medium text-white">India<br/><span className="text-gray-400 text-base font-light">Deploying Globally</span></p>
-              </div>
-            </div>
+            {/* LEFT — info */}
+            <div>
+              <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once:true }}>
+                <p style={{
+                  fontFamily:"'Space Grotesk',sans-serif",
+                  fontSize:18, color:'#8B9DB5', lineHeight:1.8,
+                  fontWeight:300, marginBottom:56,
+                }}>
+                  Tell us what you're building. We'll tell you if we're the right studio to build it with — honestly, even if the answer is no.
+                </p>
 
-            <div className="group flex items-start space-x-6">
-              <div className="bg-white/[0.02] border border-white/10 p-4 rounded-xl group-hover:border-zentry-copper/50 transition-colors duration-500">
-                <Phone className="text-zentry-copper w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="text-sm font-mono text-gray-500 tracking-widest uppercase mb-1">Emergency / Priority</h3>
-                <p className="text-xl font-medium text-white">+91 (Client Access Only)</p>
-              </div>
-            </div>
-
-          </div>
-
-          {/* Right Side: The Inquiry Form */}
-          <div className="lg:col-span-7 bg-white/[0.02] border border-white/5 p-8 md:p-12 rounded-2xl relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-zentry-copper to-zentry-slate"></div>
-            
-            <form onSubmit={handleSubmit} className="space-y-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div>
-                  <label className="block text-sm font-mono text-gray-500 mb-3 uppercase tracking-widest">Identifier (Name)</label>
-                  <input 
-                    type="text" 
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    required
-                    className="w-full bg-black/40 border-b border-white/20 px-0 py-3 text-white focus:outline-none focus:border-zentry-copper transition-colors placeholder-gray-700" 
-                    placeholder="John Doe" 
-                  />
+                {/* Contact details */}
+                <div style={{ display:'flex', flexDirection:'column', gap:32 }}>
+                  {[
+                    { icon:<MapPin size={16}/>, label:'Location', val:'Coimbatore, Tamil Nadu, India' },
+                    { icon:<Mail size={16}/>, label:'Email', val:'hello@zentryhub.in' },
+                    { icon:<MessageSquare size={16}/>, label:'Response time', val:'Within 24 hours' },
+                  ].map(item => (
+                    <div key={item.label} style={{ display:'flex', gap:16, alignItems:'flex-start' }}>
+                      <div style={{
+                        width:36, height:36, flexShrink:0,
+                        border:'1px solid #2A3446',
+                        display:'flex', alignItems:'center', justifyContent:'center',
+                        color:'#B87333',
+                      }}>
+                        {item.icon}
+                      </div>
+                      <div>
+                        <p style={{ fontFamily:"'Fragment Mono',monospace", fontSize:10, color:'#4A5568', letterSpacing:'0.15em', textTransform:'uppercase', marginBottom:4 }}>
+                          {item.label}
+                        </p>
+                        <p style={{ fontFamily:"'Space Grotesk',sans-serif", fontSize:14, color:'#8B9DB5' }}>
+                          {item.val}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <div>
-                  <label className="block text-sm font-mono text-gray-500 mb-3 uppercase tracking-widest">Return Node (Email)</label>
-                  <input 
-                    type="email" 
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    required
-                    className="w-full bg-black/40 border-b border-white/20 px-0 py-3 text-white focus:outline-none focus:border-zentry-copper transition-colors placeholder-gray-700" 
-                    placeholder="john@enterprise.com" 
-                  />
-                </div>
-              </div>
+              </motion.div>
+            </div>
 
-              <div>
-                <label className="block text-sm font-mono text-gray-500 mb-3 uppercase tracking-widest">Capital Allocation (Budget)</label>
-                <select 
-                  name="budget"
-                  value={formData.budget}
-                  onChange={handleChange}
-                  className="w-full bg-black/40 border-b border-white/20 px-0 py-3 text-white focus:outline-none focus:border-zentry-copper transition-colors appearance-none cursor-pointer"
+            {/* RIGHT — form */}
+            <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once:true }} custom={1}>
+              {submitted ? (
+                <motion.div
+                  initial={{ opacity:0, scale:0.95 }}
+                  animate={{ opacity:1, scale:1 }}
+                  style={{
+                    border:'1px solid rgba(82,183,136,0.3)',
+                    background:'rgba(82,183,136,0.05)',
+                    padding:'64px 48px', textAlign:'center',
+                  }}
                 >
-                  <option className="bg-zentry-dark text-white" value="Academic Consultation (Student Rate)">Academic Consultation (Student Rate)</option>
-                  <option className="bg-zentry-dark text-white" value="Startup MVP (₹50k - ₹1.5L)">Startup MVP (₹50k - ₹1.5L)</option>
-                  <option className="bg-zentry-dark text-white" value="Enterprise Architecture (₹1.5L - ₹5L+)">Enterprise Architecture (₹1.5L - ₹5L+)</option>
-                  <option className="bg-zentry-dark text-white" value="Retainer / Ongoing Maintenance">Retainer / Ongoing Maintenance</option>
-                </select>
-              </div>
+                  <CheckCircle size={48} color="#52B788" style={{ marginBottom:24 }}/>
+                  <h3 style={{
+                    fontFamily:"'Bebas Neue',sans-serif",
+                    fontSize:48, letterSpacing:'0.03em',
+                    color:'#F0EDE8', marginBottom:16, lineHeight:1,
+                  }}>
+                    Message Received.
+                  </h3>
+                  <p style={{ fontFamily:"'Space Grotesk',sans-serif", fontSize:16, color:'#8B9DB5', lineHeight:1.7 }}>
+                    We've got your enquiry and will respond within 24 hours. We look forward to hearing more about what you're building.
+                  </p>
+                </motion.div>
+              ) : (
+                <form onSubmit={handleSubmit(onSubmit)} style={{ display:'flex', flexDirection:'column', gap:24 }}>
 
-              <div>
-                <label className="block text-sm font-mono text-gray-500 mb-3 uppercase tracking-widest">System Requirements</label>
-                <textarea 
-                  rows="4" 
-                  name="requirements"
-                  value={formData.requirements}
-                  onChange={handleChange}
-                  required
-                  className="w-full bg-black/40 border-b border-white/20 px-0 py-3 text-white focus:outline-none focus:border-zentry-copper transition-colors resize-none placeholder-gray-700" 
-                  placeholder="Define the core features, AI requirements, or scaling needs of your project..."
-                ></textarea>
-              </div>
+                  {/* Name + Email row */}
+                  <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:16 }}>
+                    <div>
+                      <label style={{ fontFamily:"'Fragment Mono',monospace", fontSize:10, color:'#4A5568', letterSpacing:'0.18em', textTransform:'uppercase', display:'block', marginBottom:10 }}>
+                        Full Name *
+                      </label>
+                      <input {...register('name')} placeholder="Your name" style={inputStyle}/>
+                      {errors.name && <p style={{ fontFamily:"'Fragment Mono',monospace", fontSize:10, color:'#E07070', marginTop:6 }}>{errors.name.message}</p>}
+                    </div>
+                    <div>
+                      <label style={{ fontFamily:"'Fragment Mono',monospace", fontSize:10, color:'#4A5568', letterSpacing:'0.18em', textTransform:'uppercase', display:'block', marginBottom:10 }}>
+                        Email *
+                      </label>
+                      <input {...register('email')} type="email" placeholder="your@email.com" style={inputStyle}/>
+                      {errors.email && <p style={{ fontFamily:"'Fragment Mono',monospace", fontSize:10, color:'#E07070', marginTop:6 }}>{errors.email.message}</p>}
+                    </div>
+                  </div>
 
-              {/* Dynamic Button State */}
-              <button 
-                type="submit" 
-                disabled={status === 'loading' || status === 'success'}
-                className="w-full group flex justify-center items-center gap-3 bg-white/5 hover:bg-zentry-copper text-white hover:text-black font-semibold py-5 px-6 rounded-md transition-all duration-300 tracking-widest uppercase border border-white/10 hover:border-zentry-copper mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {status === 'idle' && <>Transmit Directive <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform duration-300" /></>}
-                {status === 'loading' && <><Loader2 className="w-5 h-5 animate-spin" /> Transmitting...</>}
-                {status === 'success' && <><CheckCircle className="w-5 h-5 text-green-500" /> Directive Received</>}
-                {status === 'error' && <>Transmission Failed - Retry</>}
-              </button>
-            </form>
+                  {/* Service */}
+                  <div>
+                    <label style={{ fontFamily:"'Fragment Mono',monospace", fontSize:10, color:'#4A5568', letterSpacing:'0.18em', textTransform:'uppercase', display:'block', marginBottom:10 }}>
+                      Service *
+                    </label>
+                    <select {...register('service')} style={{ ...inputStyle, cursor:'pointer' }}>
+                      <option value="">Select a service...</option>
+                      {services.map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                    {errors.service && <p style={{ fontFamily:"'Fragment Mono',monospace", fontSize:10, color:'#E07070', marginTop:6 }}>{errors.service.message}</p>}
+                  </div>
+
+                  {/* Budget */}
+                  <div>
+                    <label style={{ fontFamily:"'Fragment Mono',monospace", fontSize:10, color:'#4A5568', letterSpacing:'0.18em', textTransform:'uppercase', display:'block', marginBottom:10 }}>
+                      Budget Range
+                    </label>
+                    <select {...register('budget')} style={{ ...inputStyle, cursor:'pointer' }}>
+                      <option value="">Select a range...</option>
+                      {budgets.map(b => <option key={b} value={b}>{b}</option>)}
+                    </select>
+                  </div>
+
+                  {/* Message */}
+                  <div>
+                    <label style={{ fontFamily:"'Fragment Mono',monospace", fontSize:10, color:'#4A5568', letterSpacing:'0.18em', textTransform:'uppercase', display:'block', marginBottom:10 }}>
+                      Project Description *
+                    </label>
+                    <textarea {...register('message')} rows={6}
+                      placeholder="Tell us what you're building — what problem it solves, who uses it, and what stage you're at..."
+                      style={{ ...inputStyle, resize:'vertical', minHeight:160 }}
+                    />
+                    {errors.message && <p style={{ fontFamily:"'Fragment Mono',monospace", fontSize:10, color:'#E07070', marginTop:6 }}>{errors.message.message}</p>}
+                  </div>
+
+                  {serverError && (
+                    <div style={{
+                      background:'rgba(224,112,112,0.08)',
+                      border:'1px solid rgba(224,112,112,0.25)',
+                      padding:'14px 18px',
+                      fontFamily:"'Space Grotesk',sans-serif",
+                      fontSize:13, color:'#E07070',
+                    }}>
+                      {serverError}
+                    </div>
+                  )}
+
+                  <button type="submit" disabled={isSubmitting}
+                    style={{
+                      display:'inline-flex', alignItems:'center', justifyContent:'center', gap:10,
+                      fontFamily:"'Space Grotesk',sans-serif",
+                      fontSize:11, fontWeight:700,
+                      letterSpacing:'0.2em', textTransform:'uppercase',
+                      color:'#0D1117',
+                      background: isSubmitting
+                        ? '#7A4D22'
+                        : 'linear-gradient(135deg,#B87333,#D4956A)',
+                      border:'none', padding:'20px 40px',
+                      cursor: isSubmitting ? 'not-allowed' : 'pointer',
+                      boxShadow:'0 0 40px rgba(184,115,51,0.25)',
+                      transition:'all 0.3s', width:'100%',
+                    }}
+                    onMouseEnter={e=>{ if(!isSubmitting) e.currentTarget.style.boxShadow='0 0 60px rgba(184,115,51,0.45)' }}
+                    onMouseLeave={e=>e.currentTarget.style.boxShadow='0 0 40px rgba(184,115,51,0.25)'}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <div style={{ width:16, height:16, border:'2px solid rgba(13,17,23,0.3)', borderTopColor:'#0D1117', borderRadius:'50%', animation:'spin 0.7s linear infinite' }}/>
+                        Sending...
+                      </>
+                    ) : (
+                      <>Send Enquiry <ArrowUpRight size={15}/></>
+                    )}
+                  </button>
+                </form>
+              )}
+            </motion.div>
           </div>
-
         </div>
-      </div>
-    </div>
-  );
-};
+      </section>
 
-export default Contact;
+      <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+    </>
+  )
+}

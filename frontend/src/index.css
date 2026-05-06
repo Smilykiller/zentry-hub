@@ -1,15 +1,172 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100;300;400;600;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@300;400;500;600;700&family=Fragment+Mono:wght@400;500&family=DM+Serif+Display:ital@0;1&display=swap');
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-body {
-  @apply bg-black text-white m-0 p-0 overflow-x-hidden;
-  font-family: 'Outfit', sans-serif;
+/* ── Brand Tokens ── */
+@theme {
+  --font-heading: 'Bebas Neue', sans-serif;
+  --font-body:    'Space Grotesk', sans-serif;
+  --font-serif:   'DM Serif Display', serif;
+  --font-mono:    'Fragment Mono', monospace;
+
+  --color-zentry-copper:        #B87333;
+  --color-zentry-copper-light:  #D4956A;
+  --color-zentry-copper-dim:    #7A4D22;
+  --color-zentry-dark:          #0D1117;
+  --color-zentry-mid:           #161B22;
+  --color-zentry-surface:       #1C2333;
+  --color-zentry-border:        #2A3446;
+  --color-zentry-slate:         #4A6FA5;
+  --color-zentry-slate-light:   #6B8FC4;
+  --color-zentry-white:         #F0EDE8;
+  --color-zentry-gray:          #8B9DB5;
+  --color-zentry-gray-dim:      #4A5568;
+  --color-zentry-success:       #52B788;
 }
 
-/* Custom glowing effects */
-.glow-text {
-  text-shadow: 0 0 40px rgba(192, 124, 65, 0.4);
+/* ── Reset ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  background-color: #0D1117;
+  color: #F0EDE8;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4 { font-family: 'Bebas Neue', sans-serif; }
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar       { width: 4px; }
+::-webkit-scrollbar-track { background: #0D1117; }
+::-webkit-scrollbar-thumb { background: #7A4D22; border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: #B87333; }
+
+/* ── Selection ── */
+::selection { background: rgba(184,115,51,0.25); color: #F0EDE8; }
+
+/* ── Global keyframes ── */
+@keyframes shimmer     { 0%,100%{background-position:0% 50%} 50%{background-position:100% 50%} }
+@keyframes blink       { 0%,100%{opacity:1} 50%{opacity:0.3} }
+@keyframes spin        { to{transform:rotate(360deg)} }
+@keyframes fadeUp      { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+@keyframes slideIn     { from{opacity:0;transform:translateX(-24px)} to{opacity:1;transform:translateX(0)} }
+@keyframes glow        { 0%,100%{box-shadow:0 0 20px rgba(184,115,51,0.15)} 50%{box-shadow:0 0 40px rgba(184,115,51,0.35)} }
+
+/* ── Reusable utilities ── */
+.eyebrow {
+  font-family: 'Fragment Mono', monospace;
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #B87333;
+}
+
+.zh-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 2.5rem;
+  width: 100%;
+}
+
+.btn-copper {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: #0D1117;
+  background: linear-gradient(135deg, #B87333, #D4956A);
+  padding: 16px 36px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 0 30px rgba(184,115,51,0.25);
+  transition: box-shadow 0.3s ease;
+}
+.btn-copper:hover { box-shadow: 0 0 55px rgba(184,115,51,0.5); }
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: #F0EDE8;
+  background: none;
+  border: 1px solid rgba(240,237,232,0.2);
+  padding: 16px 36px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.btn-ghost:hover { border-color: rgba(184,115,51,0.5); color: #B87333; }
+
+.zh-card {
+  background: #161B22;
+  border: 1px solid #2A3446;
+  padding: 40px;
+  transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+}
+.zh-card:hover {
+  border-color: rgba(184,115,51,0.3);
+  transform: translateY(-4px);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3), 0 0 40px rgba(184,115,51,0.06);
+}
+
+.tech-badge {
+  font-family: 'Fragment Mono', monospace;
+  font-size: 9px;
+  color: #4A5568;
+  border: 1px solid #2A3446;
+  padding: 3px 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  display: inline-block;
+}
+
+.copper-text {
+  color: transparent;
+  background-image: linear-gradient(135deg, #B87333, #D4956A);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+.outline-text {
+  color: transparent;
+  -webkit-text-stroke: 2px rgba(184,115,51,0.6);
+}
+
+/* ── Section spacing ── */
+.section-pad { padding: 120px 2.5rem; }
+.section-pad-sm { padding: 80px 2.5rem; }
+
+/* ── Copper gradient line ── */
+.copper-line {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #B87333 25%, #D4956A 50%, #B87333 75%, transparent);
+  opacity: 0.4;
+}
+
+/* ── Responsive ── */
+@media (max-width: 1024px) {
+  .zh-container { padding: 0 2rem; }
+  .section-pad  { padding: 80px 2rem; }
+}
+@media (max-width: 768px) {
+  .section-pad    { padding: 64px 1.5rem; }
+  .section-pad-sm { padding: 48px 1.5rem; }
+  .zh-container   { padding: 0 1.5rem; }
+  .btn-copper, .btn-ghost { padding: 14px 28px; }
 }

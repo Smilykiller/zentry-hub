@@ -1,0 +1,2112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zentry Hub — Full Rebuild Plan</title>
+<style>
+  /* ── Reset & Base ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    /* Brand palette — derived from logo colour psychology */
+    --copper:       #B87333;   /* Primary accent — ambition, warmth, craftsmanship */
+    --copper-light: #D4956A;   /* Hover states */
+    --copper-dim:   #7A4D22;   /* Muted accent */
+    --navy:         #0D1117;   /* Primary bg — authority, depth, trust */
+    --navy-mid:     #161B22;   /* Surface bg */
+    --navy-surface: #1C2333;   /* Card bg */
+    --navy-border:  #2A3446;   /* Borders */
+    --slate:        #4A6FA5;   /* Secondary accent — intelligence, calm */
+    --slate-light:  #6B8FC4;
+    --white:        #F0EDE8;   /* Warm white — not pure, aligns with copper warmth */
+    --gray-400:     #8B9DB5;
+    --gray-600:     #4A5568;
+    --success:      #2D6A4F;
+    --success-light:#52B788;
+
+    --font-heading: 'Segoe UI', system-ui, sans-serif;
+    --font-body:    'Segoe UI', system-ui, sans-serif;
+    --font-mono:    'Cascadia Code', 'Courier New', monospace;
+
+    --radius-sm:    4px;
+    --radius-md:    8px;
+    --radius-lg:    14px;
+    --radius-xl:    20px;
+
+    --shadow-glow:  0 0 40px rgba(184,115,51,0.12);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--navy);
+    color: var(--white);
+    line-height: 1.7;
+    font-size: 15px;
+  }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--navy); }
+  ::-webkit-scrollbar-thumb { background: var(--copper-dim); border-radius: 3px; }
+
+  /* ── Layout ── */
+  .page-wrap { max-width: 1100px; margin: 0 auto; padding: 0 32px 80px; }
+
+  /* ── Sidebar nav ── */
+  .sidebar {
+    position: fixed;
+    top: 0; left: 0;
+    width: 240px;
+    height: 100vh;
+    background: var(--navy-mid);
+    border-right: 1px solid var(--navy-border);
+    padding: 32px 0;
+    overflow-y: auto;
+    z-index: 100;
+  }
+  .sidebar-logo {
+    padding: 0 24px 28px;
+    border-bottom: 1px solid var(--navy-border);
+    margin-bottom: 20px;
+  }
+  .sidebar-logo .name {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    color: var(--white);
+  }
+  .sidebar-logo .name span { color: var(--copper); }
+  .sidebar-logo .doc-label {
+    font-size: 10px;
+    color: var(--gray-400);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+  .nav-section-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gray-600);
+    padding: 16px 24px 6px;
+  }
+  .nav-link {
+    display: block;
+    padding: 7px 24px;
+    font-size: 13px;
+    color: var(--gray-400);
+    text-decoration: none;
+    border-left: 2px solid transparent;
+    transition: all 0.2s;
+  }
+  .nav-link:hover { color: var(--copper-light); border-left-color: var(--copper); background: rgba(184,115,51,0.05); }
+  .nav-link.active { color: var(--copper); border-left-color: var(--copper); }
+
+  /* ── Main content ── */
+  .main { margin-left: 240px; }
+  .content { max-width: 860px; margin: 0 auto; padding: 60px 40px 100px; }
+
+  /* ── Hero header ── */
+  .doc-hero {
+    border-bottom: 1px solid var(--navy-border);
+    padding-bottom: 48px;
+    margin-bottom: 60px;
+    position: relative;
+  }
+  .doc-hero::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -40px;
+    width: 400px; height: 300px;
+    background: radial-gradient(ellipse, rgba(184,115,51,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--copper);
+    background: rgba(184,115,51,0.1);
+    border: 1px solid rgba(184,115,51,0.25);
+    border-radius: var(--radius-sm);
+    padding: 4px 10px;
+    margin-bottom: 20px;
+  }
+  .doc-title {
+    font-size: 42px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    color: var(--white);
+    margin-bottom: 16px;
+  }
+  .doc-title span { color: var(--copper); }
+  .doc-subtitle {
+    font-size: 17px;
+    color: var(--gray-400);
+    font-weight: 300;
+    max-width: 560px;
+    line-height: 1.6;
+    margin-bottom: 32px;
+  }
+  .meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+  }
+  .meta-item { font-size: 12px; color: var(--gray-400); }
+  .meta-item strong { color: var(--white); font-weight: 600; }
+
+  /* ── Section headings ── */
+  .section {
+    margin-bottom: 64px;
+    scroll-margin-top: 30px;
+  }
+  .section-eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--copper);
+    margin-bottom: 8px;
+  }
+  .section-title {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--white);
+    letter-spacing: -0.02em;
+    margin-bottom: 6px;
+  }
+  .section-sub {
+    font-size: 14px;
+    color: var(--gray-400);
+    margin-bottom: 28px;
+    max-width: 600px;
+  }
+  .divider {
+    border: none;
+    border-top: 1px solid var(--navy-border);
+    margin: 48px 0;
+  }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--navy-surface);
+    border: 1px solid var(--navy-border);
+    border-radius: var(--radius-lg);
+    padding: 22px 24px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .card:hover {
+    border-color: rgba(184,115,51,0.3);
+    box-shadow: var(--shadow-glow);
+  }
+  .card-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--white);
+    margin-bottom: 6px;
+  }
+  .card-body {
+    font-size: 13px;
+    color: var(--gray-400);
+    line-height: 1.65;
+  }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  .grid-auto { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+
+  /* ── Colour Palette ── */
+  .palette-grid { display: flex; flex-wrap: wrap; gap: 12px; }
+  .swatch {
+    flex: 1; min-width: 140px;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 1px solid var(--navy-border);
+  }
+  .swatch-color { height: 64px; }
+  .swatch-info { padding: 10px 12px; background: var(--navy-surface); }
+  .swatch-name { font-size: 12px; font-weight: 600; color: var(--white); }
+  .swatch-hex  { font-size: 11px; color: var(--gray-400); font-family: var(--font-mono); }
+  .swatch-role { font-size: 11px; color: var(--gray-400); margin-top: 2px; }
+
+  /* ── Stack table ── */
+  .stack-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .stack-table thead th {
+    text-align: left;
+    padding: 10px 16px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gray-400);
+    border-bottom: 1px solid var(--navy-border);
+  }
+  .stack-table tbody tr { border-bottom: 1px solid var(--navy-border); transition: background 0.15s; }
+  .stack-table tbody tr:hover { background: rgba(255,255,255,0.02); }
+  .stack-table tbody tr:last-child { border-bottom: none; }
+  .stack-table tbody td { padding: 12px 16px; color: var(--gray-400); vertical-align: top; }
+  .stack-table tbody td:first-child { color: var(--white); font-weight: 500; }
+  .badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+  }
+  .badge-copper  { background: rgba(184,115,51,0.15); color: var(--copper-light); border: 1px solid rgba(184,115,51,0.3); }
+  .badge-slate   { background: rgba(74,111,165,0.15); color: var(--slate-light);  border: 1px solid rgba(74,111,165,0.3); }
+  .badge-green   { background: rgba(82,183,136,0.1);  color: var(--success-light); border: 1px solid rgba(82,183,136,0.3); }
+  .badge-gray    { background: rgba(255,255,255,0.05); color: var(--gray-400);     border: 1px solid var(--navy-border); }
+
+  /* ── Architecture diagram ── */
+  .arch-diagram {
+    background: var(--navy-surface);
+    border: 1px solid var(--navy-border);
+    border-radius: var(--radius-xl);
+    padding: 32px;
+    position: relative;
+    overflow: hidden;
+  }
+  .arch-diagram::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--copper), var(--slate), transparent);
+  }
+  .arch-layer {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .arch-layer-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gray-600);
+    margin-bottom: 8px;
+  }
+  .arch-node {
+    background: var(--navy-mid);
+    border: 1px solid var(--navy-border);
+    border-radius: var(--radius-md);
+    padding: 10px 14px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--white);
+    text-align: center;
+    position: relative;
+  }
+  .arch-node.copper { border-color: rgba(184,115,51,0.4); background: rgba(184,115,51,0.08); }
+  .arch-node.slate  { border-color: rgba(74,111,165,0.4);  background: rgba(74,111,165,0.08); }
+  .arch-node.green  { border-color: rgba(82,183,136,0.3);  background: rgba(82,183,136,0.06); }
+  .arch-arrow { text-align: center; color: var(--gray-600); font-size: 18px; margin: 4px 0; }
+
+  /* ── Phase timeline ── */
+  .timeline { position: relative; padding-left: 36px; }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 10px; top: 8px; bottom: 0;
+    width: 1px;
+    background: linear-gradient(to bottom, var(--copper), var(--navy-border) 80%, transparent);
+  }
+  .phase {
+    position: relative;
+    margin-bottom: 36px;
+  }
+  .phase::before {
+    content: '';
+    position: absolute;
+    left: -30px; top: 6px;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--copper);
+    box-shadow: 0 0 0 3px rgba(184,115,51,0.15);
+  }
+  .phase-num {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--copper);
+    margin-bottom: 4px;
+  }
+  .phase-title { font-size: 15px; font-weight: 700; color: var(--white); margin-bottom: 6px; }
+  .phase-duration {
+    display: inline-block;
+    font-size: 11px;
+    font-family: var(--font-mono);
+    color: var(--gray-400);
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--navy-border);
+    border-radius: var(--radius-sm);
+    padding: 2px 8px;
+    margin-bottom: 10px;
+  }
+  .phase-body { font-size: 13px; color: var(--gray-400); line-height: 1.65; }
+  .phase-tasks { list-style: none; margin-top: 10px; }
+  .phase-tasks li {
+    font-size: 12px;
+    color: var(--gray-400);
+    padding: 4px 0 4px 16px;
+    position: relative;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+  }
+  .phase-tasks li:last-child { border-bottom: none; }
+  .phase-tasks li::before {
+    content: '›';
+    position: absolute;
+    left: 2px;
+    color: var(--copper-dim);
+  }
+
+  /* ── DB schema ── */
+  .schema-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    font-family: var(--font-mono);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 1px solid var(--navy-border);
+  }
+  .schema-table thead th {
+    background: rgba(184,115,51,0.1);
+    color: var(--copper-light);
+    padding: 8px 14px;
+    text-align: left;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+  }
+  .schema-table tbody tr { border-top: 1px solid var(--navy-border); }
+  .schema-table tbody tr:hover { background: rgba(255,255,255,0.02); }
+  .schema-table tbody td { padding: 8px 14px; color: var(--gray-400); }
+  .schema-table tbody td:first-child { color: var(--white); }
+  .type-tag {
+    display: inline-block;
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 3px;
+    background: rgba(74,111,165,0.15);
+    color: var(--slate-light);
+    border: 1px solid rgba(74,111,165,0.2);
+  }
+  .pk-tag {
+    display: inline-block;
+    font-size: 9px;
+    padding: 1px 5px;
+    border-radius: 3px;
+    background: rgba(184,115,51,0.15);
+    color: var(--copper);
+    border: 1px solid rgba(184,115,51,0.25);
+    margin-left: 4px;
+  }
+
+  /* ── API routes ── */
+  .route-list { display: flex; flex-direction: column; gap: 8px; }
+  .route {
+    display: grid;
+    grid-template-columns: 60px 240px 1fr;
+    gap: 14px;
+    align-items: start;
+    background: var(--navy-surface);
+    border: 1px solid var(--navy-border);
+    border-radius: var(--radius-md);
+    padding: 12px 16px;
+    font-size: 12px;
+  }
+  .method {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+    text-align: center;
+  }
+  .method.get    { background: rgba(82,183,136,0.12); color: #52B788; }
+  .method.post   { background: rgba(184,115,51,0.12); color: var(--copper-light); }
+  .method.put    { background: rgba(74,111,165,0.12); color: var(--slate-light); }
+  .method.delete { background: rgba(180,60,60,0.12);  color: #E07070; }
+  .route-path { font-family: var(--font-mono); color: var(--white); }
+  .route-desc { color: var(--gray-400); }
+
+  /* ── Page map ── */
+  .page-map { display: flex; flex-direction: column; gap: 10px; }
+  .page-row {
+    display: grid;
+    grid-template-columns: 160px 1fr 120px;
+    gap: 16px;
+    align-items: start;
+    background: var(--navy-surface);
+    border: 1px solid var(--navy-border);
+    border-radius: var(--radius-md);
+    padding: 14px 18px;
+    font-size: 13px;
+  }
+  .page-name { font-weight: 600; color: var(--white); }
+  .page-url  { font-family: var(--font-mono); font-size: 11px; color: var(--copper-dim); margin-top: 2px; }
+  .page-desc { color: var(--gray-400); font-size: 12px; line-height: 1.55; }
+  .page-status { font-size: 11px; text-align: right; }
+
+  /* ── Checklist ── */
+  .checklist { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+  .checklist li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--gray-400);
+    padding: 8px 12px;
+    background: var(--navy-surface);
+    border: 1px solid var(--navy-border);
+    border-radius: var(--radius-md);
+  }
+  .check-icon {
+    width: 16px; height: 16px;
+    border: 1.5px solid var(--navy-border);
+    border-radius: 4px;
+    flex-shrink: 0;
+    margin-top: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+  }
+
+  /* ── Callout boxes ── */
+  .callout {
+    border-radius: var(--radius-md);
+    padding: 16px 18px;
+    font-size: 13px;
+    line-height: 1.65;
+    margin: 16px 0;
+    border-left: 3px solid;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .callout-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .callout.info    { background: rgba(74,111,165,0.08); border-color: var(--slate); color: var(--gray-400); }
+  .callout.warning { background: rgba(184,115,51,0.08); border-color: var(--copper); color: var(--gray-400); }
+  .callout.tip     { background: rgba(82,183,136,0.08); border-color: var(--success-light); color: var(--gray-400); }
+
+  /* ── Colour psychology table ── */
+  .psy-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .psy-table thead th {
+    text-align: left;
+    padding: 10px 14px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gray-400);
+    border-bottom: 1px solid var(--navy-border);
+  }
+  .psy-table tbody tr { border-bottom: 1px solid rgba(255,255,255,0.04); }
+  .psy-table tbody td { padding: 12px 14px; color: var(--gray-400); vertical-align: top; }
+  .psy-table tbody td:first-child { font-weight: 600; color: var(--white); }
+  .color-dot {
+    display: inline-block;
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+
+  /* ── Folder tree ── */
+  .tree {
+    background: var(--navy-mid);
+    border: 1px solid var(--navy-border);
+    border-radius: var(--radius-lg);
+    padding: 20px 24px;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    line-height: 1.9;
+    color: var(--gray-400);
+  }
+  .tree .folder { color: var(--copper-light); }
+  .tree .file   { color: var(--white); }
+  .tree .comment{ color: var(--gray-600); font-style: italic; }
+
+  /* ── Security section ── */
+  .security-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .security-item {
+    background: var(--navy-surface);
+    border: 1px solid var(--navy-border);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+    border-left: 3px solid var(--copper-dim);
+  }
+  .security-item .si-title { font-size: 13px; font-weight: 600; color: var(--white); margin-bottom: 4px; }
+  .security-item .si-desc  { font-size: 12px; color: var(--gray-400); line-height: 1.55; }
+
+  /* ── Print ── */
+  @media print {
+    .sidebar { display: none; }
+    .main { margin-left: 0; }
+    .content { padding: 20px; }
+    body { background: white; color: black; }
+    .card, .arch-diagram, .tree { background: #f5f5f5; border-color: #ddd; }
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 800px) {
+    .sidebar { display: none; }
+    .main { margin-left: 0; }
+    .content { padding: 32px 20px 80px; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .route { grid-template-columns: 50px 1fr; }
+    .route-desc { display: none; }
+    .page-row { grid-template-columns: 1fr; }
+    .security-grid { grid-template-columns: 1fr; }
+    .doc-title { font-size: 28px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════
+     SIDEBAR NAVIGATION
+══════════════════════════════════════════════ -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <div class="name">ZENTRY<span>HUB</span></div>
+    <div class="doc-label">Full Rebuild Plan v1.0</div>
+  </div>
+
+  <div class="nav-section-label">Overview</div>
+  <a class="nav-link" href="#overview">Executive Summary</a>
+  <a class="nav-link" href="#colours">Colour System</a>
+  <a class="nav-link" href="#pages">Site Map</a>
+
+  <div class="nav-section-label">Frontend</div>
+  <a class="nav-link" href="#frontend-stack">Tech Stack</a>
+  <a class="nav-link" href="#frontend-structure">Folder Structure</a>
+  <a class="nav-link" href="#frontend-pages">Page Breakdown</a>
+  <a class="nav-link" href="#animations">Animations</a>
+
+  <div class="nav-section-label">Backend</div>
+  <a class="nav-link" href="#backend-stack">Architecture</a>
+  <a class="nav-link" href="#database">Database Schema</a>
+  <a class="nav-link" href="#api">API Reference</a>
+  <a class="nav-link" href="#auth">Authentication</a>
+
+  <div class="nav-section-label">Infrastructure</div>
+  <a class="nav-link" href="#deploy">Deployment</a>
+  <a class="nav-link" href="#security">Security</a>
+  <a class="nav-link" href="#seo">SEO & Analytics</a>
+
+  <div class="nav-section-label">Build Plan</div>
+  <a class="nav-link" href="#phases">Dev Phases</a>
+  <a class="nav-link" href="#checklist">Launch Checklist</a>
+</nav>
+
+<!-- ══════════════════════════════════════════════
+     MAIN CONTENT
+══════════════════════════════════════════════ -->
+<main class="main">
+<div class="content">
+
+  <!-- ── HERO ── -->
+  <div class="doc-hero">
+    <div class="tag">&#9679; Confidential Planning Document</div>
+    <h1 class="doc-title">Zentry Hub<br><span>Complete Rebuild Plan</span></h1>
+    <p class="doc-subtitle">Full-stack architecture, design system, database schema, API specification, and phased development plan for a production-grade company portfolio.</p>
+    <div class="meta-row">
+      <div class="meta-item">Company: <strong>Zentry Hub</strong></div>
+      <div class="meta-item">Domain: <strong>zentryhub.in (recommended)</strong></div>
+      <div class="meta-item">Stack: <strong>React · Node.js · PostgreSQL</strong></div>
+      <div class="meta-item">Est. Build Time: <strong>3–4 Weeks</strong></div>
+      <div class="meta-item">Version: <strong>1.0 — May 2026</strong></div>
+    </div>
+  </div>
+
+
+  <!-- ════════════════════════════════════
+       SECTION 1 — OVERVIEW
+  ════════════════════════════════════ -->
+  <section class="section" id="overview">
+    <div class="section-eyebrow">01 · Overview</div>
+    <h2 class="section-title">Executive Summary</h2>
+    <p class="section-sub">What we are building, why, and what it needs to do.</p>
+
+    <div class="grid-2" style="margin-bottom:16px;">
+      <div class="card">
+        <div class="card-title">🎯 Primary Goal</div>
+        <div class="card-body">A high-converting, production-grade company portfolio that communicates technical excellence to potential clients — with a live admin backend to manage projects, testimonials, and leads without touching code.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">📍 Target Audience</div>
+        <div class="card-body">Small-to-medium businesses, startup founders, and academic institutions in India and globally who need custom software, ML models, automation, or institutional management systems.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">⚡ Key Differentiator</div>
+        <div class="card-body">Dark, geometric, copper-accented aesthetic that signals premium engineering — not a generic template. All portfolio content managed live from an admin dashboard with no redeployment required.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">🔧 What's Being Fixed</div>
+        <div class="card-body">Broken Tailwind tokens, exposed admin route, non-functional contact form, missing logo, placeholder project visuals, 4-second blocking loader, and negative z-index mobile menu bug from the previous build.</div>
+      </div>
+    </div>
+
+    <div class="callout warning">
+      <span class="callout-icon">⚠</span>
+      <div><strong style="color:var(--copper-light)">Domain recommendation:</strong> Register <strong>zentryhub.in</strong> (India-targeted, ~₹800/yr) or <strong>zentryhub.com</strong> (~$12/yr) before launching. Use Cloudflare for DNS to get free DDoS protection, SSL, and caching out of the box.</div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+
+  <!-- ════════════════════════════════════
+       SECTION 2 — COLOUR SYSTEM
+  ════════════════════════════════════ -->
+  <section class="section" id="colours">
+    <div class="section-eyebrow">02 · Design</div>
+    <h2 class="section-title">Colour System & Psychology</h2>
+    <p class="section-sub">Derived directly from the logo — dark navy base with copper/bronze primary and slate blue secondary. This is not arbitrary; every colour choice maps to a psychological signal your clients receive.</p>
+
+    <table class="psy-table" style="margin-bottom: 28px;">
+      <thead>
+        <tr>
+          <th>Colour</th>
+          <th>Hex</th>
+          <th>Role in UI</th>
+          <th>Psychological Signal</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="color-dot" style="background:#B87333;"></span>Copper / Bronze</td>
+          <td style="font-family:var(--font-mono); font-size:12px;">#B87333</td>
+          <td>Primary accent · CTAs · Links · Hover states</td>
+          <td>Craftsmanship, ambition, warmth. Signals premium quality without coldness. Rare in tech — instantly memorable and differentiating.</td>
+        </tr>
+        <tr>
+          <td><span class="color-dot" style="background:#0D1117;"></span>Deep Navy</td>
+          <td style="font-family:var(--font-mono); font-size:12px;">#0D1117</td>
+          <td>Page background · Primary surface</td>
+          <td>Authority, depth, trust. Almost-black rather than pure black avoids harshness. Signals technical precision and focus.</td>
+        </tr>
+        <tr>
+          <td><span class="color-dot" style="background:#1C2333;"></span>Navy Surface</td>
+          <td style="font-family:var(--font-mono); font-size:12px;">#1C2333</td>
+          <td>Cards · Panels · Form backgrounds</td>
+          <td>Subtle layering creates depth perception without distracting from content. Keeps hierarchy clean.</td>
+        </tr>
+        <tr>
+          <td><span class="color-dot" style="background:#4A6FA5;"></span>Steel Blue / Slate</td>
+          <td style="font-family:var(--font-mono); font-size:12px;">#4A6FA5</td>
+          <td>Secondary accent · Tags · Info states</td>
+          <td>Intelligence, calm, reliability. Balances the warmth of copper with cool analytical energy. Common in enterprise software — feels trustworthy.</td>
+        </tr>
+        <tr>
+          <td><span class="color-dot" style="background:#F0EDE8;"></span>Warm White</td>
+          <td style="font-family:var(--font-mono); font-size:12px;">#F0EDE8</td>
+          <td>Body text · Headings</td>
+          <td>Warm white (not pure #FFFFFF) reduces eye strain and harmonises with the copper accent. Feels refined, not clinical.</td>
+        </tr>
+        <tr>
+          <td><span class="color-dot" style="background:#8B9DB5;"></span>Cool Gray</td>
+          <td style="font-family:var(--font-mono); font-size:12px;">#8B9DB5</td>
+          <td>Body text · Descriptions · Muted content</td>
+          <td>Hierarchy without distraction. Keeps secondary content readable without competing with primary headings.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="palette-grid">
+      <div class="swatch">
+        <div class="swatch-color" style="background:#0D1117;"></div>
+        <div class="swatch-info"><div class="swatch-name">Navy Dark</div><div class="swatch-hex">#0D1117</div><div class="swatch-role">Page BG</div></div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#1C2333;"></div>
+        <div class="swatch-info"><div class="swatch-name">Navy Surface</div><div class="swatch-hex">#1C2333</div><div class="swatch-role">Cards</div></div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#2A3446;"></div>
+        <div class="swatch-info"><div class="swatch-name">Navy Border</div><div class="swatch-hex">#2A3446</div><div class="swatch-role">Borders</div></div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#B87333;"></div>
+        <div class="swatch-info"><div class="swatch-name">Copper</div><div class="swatch-hex">#B87333</div><div class="swatch-role">Primary Accent</div></div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#D4956A;"></div>
+        <div class="swatch-info"><div class="swatch-name">Copper Light</div><div class="swatch-hex">#D4956A</div><div class="swatch-role">Hover / Active</div></div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#4A6FA5;"></div>
+        <div class="swatch-info"><div class="swatch-name">Slate Blue</div><div class="swatch-hex">#4A6FA5</div><div class="swatch-role">Secondary</div></div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#F0EDE8;"></div>
+        <div class="swatch-info"><div class="swatch-name">Warm White</div><div class="swatch-hex">#F0EDE8</div><div class="swatch-role">Headings</div></div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#8B9DB5;"></div>
+        <div class="swatch-info"><div class="swatch-name">Cool Gray</div><div class="swatch-hex">#8B9DB5</div><div class="swatch-role">Body text</div></div>
+      </div>
+    </div>
+
+    <div class="callout tip" style="margin-top:20px;">
+      <span class="callout-icon">💡</span>
+      <div><strong style="color:var(--success-light)">Typography:</strong> Use <strong>Sora</strong> (Google Fonts) for headings — geometric, modern, pairs with the polygon logo. Use <strong>Inter</strong> for body text and <strong>JetBrains Mono</strong> for all code snippets and tech labels. Load via Google Fonts CDN, subset to Latin only for performance.</div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+
+  <!-- ════════════════════════════════════
+       SECTION 3 — SITE MAP
+  ════════════════════════════════════ -->
+  <section class="section" id="pages">
+    <div class="section-eyebrow">03 · Structure</div>
+    <h2 class="section-title">Complete Site Map</h2>
+    <p class="section-sub">Every public page, its route, and its purpose.</p>
+
+    <div class="page-map">
+      <div class="page-row" style="background:rgba(184,115,51,0.05); border-color:rgba(184,115,51,0.2);">
+        <div><div class="page-name">Home</div><div class="page-url">/</div></div>
+        <div class="page-desc">Hero with animated headline, 3-capability summary, 3 featured projects teaser (pulled from DB), methodology strip, client stats, and CTA section. The single most important conversion page.</div>
+        <div class="page-status"><span class="badge badge-copper">Priority 1</span></div>
+      </div>
+      <div class="page-row">
+        <div><div class="page-name">Services</div><div class="page-url">/services</div></div>
+        <div class="page-desc">Four pillars layout with sticky left label + card grid on right. Full list of 11 services across Core Web Dev, AI/Data, Niche Systems, and Support. Each card has an icon, title, and description.</div>
+        <div class="page-status"><span class="badge badge-copper">Priority 1</span></div>
+      </div>
+      <div class="page-row">
+        <div><div class="page-name">Portfolio / Work</div><div class="page-url">/work</div></div>
+        <div class="page-desc">Live DB-driven project list. Filter by category. Each project card: title, description, tech stack tags, a real preview image/video (stored in Cloudinary), and an optional live/GitHub link.</div>
+        <div class="page-status"><span class="badge badge-copper">Priority 1</span></div>
+      </div>
+      <div class="page-row">
+        <div><div class="page-name">About / Agency</div><div class="page-url">/about</div></div>
+        <div class="page-desc">Founder profile with actual photo or designed portrait. Company philosophy. Skills/tech stack visual. "Why Zentry Hub" section. Builds personal trust with Indian SME clients especially.</div>
+        <div class="page-status"><span class="badge badge-slate">Priority 2</span></div>
+      </div>
+      <div class="page-row">
+        <div><div class="page-name">Testimonials</div><div class="page-url">/testimonials</div></div>
+        <div class="page-desc">Live DB-driven client reviews. Moderation queue via admin. Public submission form with star rating. Approved reviews display with author, project, stars, and quote.</div>
+        <div class="page-status"><span class="badge badge-slate">Priority 2</span></div>
+      </div>
+      <div class="page-row">
+        <div><div class="page-name">Contact</div><div class="page-url">/contact</div></div>
+        <div class="page-desc">Project intake form: name, email, service category, budget range, project description. Submits to DB (leads table) and sends email notification via Nodemailer/Resend. Also shows WhatsApp/LinkedIn links.</div>
+        <div class="page-status"><span class="badge badge-copper">Priority 1</span></div>
+      </div>
+      <div class="page-row">
+        <div><div class="page-name">Admin Dashboard</div><div class="page-url">/admin</div></div>
+        <div class="page-desc">Protected behind JWT auth. Tabs: Projects (CRUD), Testimonials (approve/reject queue), Leads/Enquiries (view contact submissions). Password-change option. No public access.</div>
+        <div class="page-status"><span class="badge badge-gray">Protected</span></div>
+      </div>
+      <div class="page-row">
+        <div><div class="page-name">Admin Login</div><div class="page-url">/admin/login</div></div>
+        <div class="page-desc">Separate login page. Email + password form. On success, stores JWT in httpOnly cookie. Redirects to /admin dashboard. Rate-limited to prevent brute force.</div>
+        <div class="page-status"><span class="badge badge-gray">Protected</span></div>
+      </div>
+      <div class="page-row">
+        <div><div class="page-name">404 Not Found</div><div class="page-url">*</div></div>
+        <div class="page-desc">On-brand error page with animated "404" in the Zentry aesthetic. CTA to return home. Important for professional appearance.</div>
+        <div class="page-status"><span class="badge badge-gray">Utility</span></div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+
+  <!-- ════════════════════════════════════
+       SECTION 4 — FRONTEND STACK
+  ════════════════════════════════════ -->
+  <section class="section" id="frontend-stack">
+    <div class="section-eyebrow">04 · Frontend</div>
+    <h2 class="section-title">Frontend Tech Stack</h2>
+    <p class="section-sub">Every tool chosen for a reason — no bloat.</p>
+
+    <table class="stack-table" style="background:var(--navy-surface); border:1px solid var(--navy-border); border-radius:var(--radius-lg); overflow:hidden; margin-bottom:20px;">
+      <thead>
+        <tr><th>Tool</th><th>Version</th><th>Purpose</th><th>Why This</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>React</td>
+          <td><span class="badge badge-green">v18</span></td>
+          <td>UI framework</td>
+          <td>You already know it from the old build. Concurrent rendering for smoother animations.</td>
+        </tr>
+        <tr>
+          <td>Vite</td>
+          <td><span class="badge badge-green">v5</span></td>
+          <td>Build tool</td>
+          <td>10x faster than CRA. HMR is instant. Production bundles are smaller.</td>
+        </tr>
+        <tr>
+          <td>React Router</td>
+          <td><span class="badge badge-green">v6</span></td>
+          <td>Client-side routing</td>
+          <td>Standard. Nested routes for admin layout. Loader functions for data fetching.</td>
+        </tr>
+        <tr>
+          <td>Tailwind CSS</td>
+          <td><span class="badge badge-green">v4</span></td>
+          <td>Styling</td>
+          <td>Keep what you know. v4 uses CSS variables natively — perfect for our custom theme.</td>
+        </tr>
+        <tr>
+          <td>Framer Motion</td>
+          <td><span class="badge badge-copper">v11</span></td>
+          <td>Animations</td>
+          <td>Replace all inline CSS animations. <code>whileInView</code> for scroll reveals. <code>AnimatePresence</code> for page transitions. Production-grade, accessible.</td>
+        </tr>
+        <tr>
+          <td>Axios</td>
+          <td><span class="badge badge-slate">v1</span></td>
+          <td>HTTP client</td>
+          <td>Cleaner than fetch for interceptors, auth headers, and error handling. Centralise API calls in one service file.</td>
+        </tr>
+        <tr>
+          <td>React Query</td>
+          <td><span class="badge badge-copper">v5</span></td>
+          <td>Server state</td>
+          <td>Caches API responses, handles loading/error states, automatic refetch. No hand-writing useEffect + useState for every fetch.</td>
+        </tr>
+        <tr>
+          <td>Lucide React</td>
+          <td><span class="badge badge-gray">latest</span></td>
+          <td>Icons</td>
+          <td>Already in your codebase. Tree-shakeable SVG icons — zero performance cost.</td>
+        </tr>
+        <tr>
+          <td>React Hook Form</td>
+          <td><span class="badge badge-green">v7</span></td>
+          <td>Form management</td>
+          <td>Zero re-renders on input. Built-in validation. Much cleaner than manual useState for the contact form.</td>
+        </tr>
+        <tr>
+          <td>Zod</td>
+          <td><span class="badge badge-slate">v3</span></td>
+          <td>Schema validation</td>
+          <td>Validate form data client-side before sending to API. Same schema can be reused on the backend.</td>
+        </tr>
+        <tr>
+          <td>Cloudinary SDK</td>
+          <td><span class="badge badge-gray">latest</span></td>
+          <td>Image delivery</td>
+          <td>Project images and founder photo served via CDN with automatic WebP conversion and lazy loading.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout info">
+      <span class="callout-icon">ℹ</span>
+      <div>Install command after creating the Vite project: <code style="font-family:var(--font-mono); font-size:12px; color:var(--copper-light);">npm install react-router-dom framer-motion axios @tanstack/react-query react-hook-form zod @hookform/resolvers lucide-react</code></div>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════
+       FRONTEND FOLDER STRUCTURE
+  ════════════════════════════════════ -->
+  <section class="section" id="frontend-structure">
+    <div class="section-eyebrow">05 · Frontend</div>
+    <h2 class="section-title">Folder Structure</h2>
+    <p class="section-sub">Clean, scalable layout. Every file has a home.</p>
+
+    <div class="tree">
+<span class="folder">src/</span>
+├── <span class="folder">assets/</span>
+│   ├── <span class="file">logo.png</span>              <span class="comment">← imported, not in /public</span>
+│   └── <span class="file">logo.svg</span>              <span class="comment">← SVG version for scalability</span>
+│
+├── <span class="folder">components/</span>              <span class="comment">← reusable building blocks</span>
+│   ├── <span class="folder">layout/</span>
+│   │   ├── <span class="file">Navbar.jsx</span>
+│   │   ├── <span class="file">Footer.jsx</span>
+│   │   └── <span class="file">PageTransition.jsx</span>  <span class="comment">← Framer Motion wrapper</span>
+│   ├── <span class="folder">ui/</span>
+│   │   ├── <span class="file">Button.jsx</span>           <span class="comment">← reusable button variants</span>
+│   │   ├── <span class="file">Badge.jsx</span>
+│   │   ├── <span class="file">SectionHeader.jsx</span>
+│   │   ├── <span class="file">Spinner.jsx</span>
+│   │   └── <span class="file">AnimatedSection.jsx</span>  <span class="comment">← whileInView scroll reveal</span>
+│   ├── <span class="folder">home/</span>
+│   │   ├── <span class="file">HeroSection.jsx</span>
+│   │   ├── <span class="file">CapabilitiesStrip.jsx</span>
+│   │   ├── <span class="file">FeaturedProjects.jsx</span>
+│   │   ├── <span class="file">MethodologySection.jsx</span>
+│   │   └── <span class="file">CtaSection.jsx</span>
+│   ├── <span class="folder">work/</span>
+│   │   ├── <span class="file">ProjectCard.jsx</span>
+│   │   └── <span class="file">FilterBar.jsx</span>
+│   └── <span class="folder">admin/</span>
+│       ├── <span class="file">ProtectedRoute.jsx</span>  <span class="comment">← JWT guard</span>
+│       ├── <span class="file">ProjectForm.jsx</span>
+│       ├── <span class="file">TestimonialQueue.jsx</span>
+│       └── <span class="file">LeadsTable.jsx</span>
+│
+├── <span class="folder">pages/</span>
+│   ├── <span class="file">Home.jsx</span>
+│   ├── <span class="file">Services.jsx</span>
+│   ├── <span class="file">Work.jsx</span>
+│   ├── <span class="file">About.jsx</span>
+│   ├── <span class="file">Testimonials.jsx</span>
+│   ├── <span class="file">Contact.jsx</span>
+│   ├── <span class="file">NotFound.jsx</span>
+│   └── <span class="folder">admin/</span>
+│       ├── <span class="file">AdminLogin.jsx</span>
+│       └── <span class="file">AdminDashboard.jsx</span>
+│
+├── <span class="folder">hooks/</span>
+│   ├── <span class="file">useAuth.js</span>              <span class="comment">← JWT state from cookie</span>
+│   └── <span class="file">useScrollTop.js</span>
+│
+├── <span class="folder">services/</span>               <span class="comment">← all API calls go here</span>
+│   ├── <span class="file">api.js</span>                  <span class="comment">← Axios instance with base URL + auth header</span>
+│   ├── <span class="file">projectsApi.js</span>
+│   ├── <span class="file">testimonialsApi.js</span>
+│   ├── <span class="file">contactApi.js</span>
+│   └── <span class="file">adminApi.js</span>
+│
+├── <span class="folder">context/</span>
+│   └── <span class="file">AuthContext.jsx</span>         <span class="comment">← global auth state</span>
+│
+├── <span class="folder">utils/</span>
+│   └── <span class="file">validators.js</span>           <span class="comment">← Zod schemas shared with forms</span>
+│
+├── <span class="file">App.jsx</span>                     <span class="comment">← routes + QueryClientProvider</span>
+├── <span class="file">main.jsx</span>
+└── <span class="file">index.css</span>                   <span class="comment">← Tailwind directives + CSS vars</span>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════
+       ANIMATIONS PLAN
+  ════════════════════════════════════ -->
+  <section class="section" id="animations">
+    <div class="section-eyebrow">06 · Frontend</div>
+    <h2 class="section-title">Animation Strategy</h2>
+    <p class="section-sub">Purposeful motion — every animation earns its place.</p>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Page Transitions</div>
+        <div class="card-body">Use Framer Motion's <code>AnimatePresence</code> with a 0.3s fade + slight upward slide on route change. Replace the old 4-second blocking loader entirely. First visit only: 0.8s brand intro animation.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Scroll Reveals</div>
+        <div class="card-body">All section cards use <code>whileInView</code> with <code>once: true</code> and staggered children via <code>variants</code>. Opacity 0→1, Y +20→0. Triggers when 20% of element is in view.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Navbar Scroll Effect</div>
+        <div class="card-body">On scroll past 60px, navbar background transitions from transparent to <code>rgba(13,17,23,0.95)</code> with <code>backdrop-blur</code>. Logo scale increases slightly. Use <code>useScroll</code> from Framer Motion.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Hover Micro-interactions</div>
+        <div class="card-body">Project cards: subtle Y -4px translate + border glow on hover. CTA buttons: copper fill slides up from bottom (existing pattern — keep it, it works). Nav links: copper underline scales in from left.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Hero Text Animation</div>
+        <div class="card-body">Headline words stagger in one by one (0.08s delay between each) using Framer Motion's <code>variants</code> with <code>staggerChildren</code>. Only fires once on mount — not blocked by loader.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Performance Rules</div>
+        <div class="card-body">Only animate <code>transform</code> and <code>opacity</code> — never layout properties like <code>height</code>, <code>width</code>, or <code>padding</code>. Use <code>will-change: transform</code> on animated cards. Respect <code>prefers-reduced-motion</code>.</div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+
+  <!-- ════════════════════════════════════
+       SECTION 7 — BACKEND STACK
+  ════════════════════════════════════ -->
+  <section class="section" id="backend-stack">
+    <div class="section-eyebrow">07 · Backend</div>
+    <h2 class="section-title">Backend Architecture</h2>
+    <p class="section-sub">Node.js + Express REST API. Clean, modular, production-ready.</p>
+
+    <div class="arch-diagram" style="margin-bottom:24px;">
+      <div class="arch-layer-label">Client</div>
+      <div class="arch-layer" style="grid-template-columns: 1fr 1fr 1fr;">
+        <div class="arch-node copper">React Frontend<br><small style="opacity:0.6;">Vercel</small></div>
+        <div class="arch-node copper">Mobile Browser<br><small style="opacity:0.6;">Any device</small></div>
+        <div class="arch-node copper">Admin Dashboard<br><small style="opacity:0.6;">/admin route</small></div>
+      </div>
+      <div class="arch-arrow">↓  HTTPS  ↓</div>
+      <div class="arch-layer-label">Middleware</div>
+      <div class="arch-layer" style="grid-template-columns: 1fr 1fr 1fr 1fr;">
+        <div class="arch-node slate">CORS Policy</div>
+        <div class="arch-node slate">Rate Limiter</div>
+        <div class="arch-node slate">JWT Auth Guard</div>
+        <div class="arch-node slate">Input Validation</div>
+      </div>
+      <div class="arch-arrow">↓</div>
+      <div class="arch-layer-label">Express Routes</div>
+      <div class="arch-layer" style="grid-template-columns: repeat(5,1fr);">
+        <div class="arch-node">/api/projects</div>
+        <div class="arch-node">/api/testimonials</div>
+        <div class="arch-node">/api/contact</div>
+        <div class="arch-node">/api/admin</div>
+        <div class="arch-node">/api/auth</div>
+      </div>
+      <div class="arch-arrow">↓</div>
+      <div class="arch-layer-label">Data & Services</div>
+      <div class="arch-layer" style="grid-template-columns: 1fr 1fr 1fr 1fr;">
+        <div class="arch-node green">PostgreSQL<br><small style="opacity:0.6;">Neon (free)</small></div>
+        <div class="arch-node green">Prisma ORM<br><small style="opacity:0.6;">Type-safe queries</small></div>
+        <div class="arch-node green">Cloudinary<br><small style="opacity:0.6;">Image CDN</small></div>
+        <div class="arch-node green">Resend<br><small style="opacity:0.6;">Email notifications</small></div>
+      </div>
+    </div>
+
+    <table class="stack-table" style="background:var(--navy-surface); border:1px solid var(--navy-border); border-radius:var(--radius-lg); overflow:hidden;">
+      <thead>
+        <tr><th>Tool</th><th>Version</th><th>Purpose</th><th>Why This</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Node.js</td>
+          <td><span class="badge badge-green">v20 LTS</span></td>
+          <td>Runtime</td>
+          <td>You specified Node.js. LTS version for production stability.</td>
+        </tr>
+        <tr>
+          <td>Express.js</td>
+          <td><span class="badge badge-green">v4</span></td>
+          <td>HTTP framework</td>
+          <td>Minimal, battle-tested. Clean routing and middleware system. Perfect scale for a portfolio backend.</td>
+        </tr>
+        <tr>
+          <td>PostgreSQL</td>
+          <td><span class="badge badge-slate">via Neon</span></td>
+          <td>Primary database</td>
+          <td>Relational — perfect for structured data (projects, leads, testimonials). Neon provides free serverless PostgreSQL with a generous free tier, no card required.</td>
+        </tr>
+        <tr>
+          <td>Prisma ORM</td>
+          <td><span class="badge badge-copper">v5</span></td>
+          <td>Database client</td>
+          <td>Type-safe queries, auto-migration, beautiful schema syntax. Generates TypeScript types from your DB schema. Much safer than raw SQL.</td>
+        </tr>
+        <tr>
+          <td>JWT + bcryptjs</td>
+          <td><span class="badge badge-gray">latest</span></td>
+          <td>Authentication</td>
+          <td>Stateless JWT tokens stored in httpOnly cookies for admin auth. bcryptjs for password hashing. No third-party auth service needed.</td>
+        </tr>
+        <tr>
+          <td>express-rate-limit</td>
+          <td><span class="badge badge-gray">latest</span></td>
+          <td>Rate limiting</td>
+          <td>Prevents brute-force on login and spam on contact form. One-line setup.</td>
+        </tr>
+        <tr>
+          <td>Resend</td>
+          <td><span class="badge badge-green">free</span></td>
+          <td>Email service</td>
+          <td>3,000 free emails/month. Send notification emails when a contact form is submitted. Clean API, reliable delivery, free tier sufficient.</td>
+        </tr>
+        <tr>
+          <td>Cloudinary</td>
+          <td><span class="badge badge-green">free</span></td>
+          <td>Image storage & CDN</td>
+          <td>25 free credits/month. Store project images and founder photo. Serves via CDN with auto-WebP, auto-resize. No self-hosting needed.</td>
+        </tr>
+        <tr>
+          <td>Helmet.js</td>
+          <td><span class="badge badge-gray">latest</span></td>
+          <td>Security headers</td>
+          <td>Sets 15 security HTTP headers in one line. Blocks XSS, clickjacking, MIME sniffing attacks. Non-negotiable for production.</td>
+        </tr>
+        <tr>
+          <td>cors</td>
+          <td><span class="badge badge-gray">latest</span></td>
+          <td>CORS policy</td>
+          <td>Restrict API access to your frontend domain only. Reject requests from unknown origins.</td>
+        </tr>
+        <tr>
+          <td>dotenv</td>
+          <td><span class="badge badge-gray">latest</span></td>
+          <td>Environment config</td>
+          <td>Never hardcode secrets. All API keys in .env, loaded at startup.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ════════════════════════════════════
+       SECTION 8 — DATABASE SCHEMA
+  ════════════════════════════════════ -->
+  <section class="section" id="database">
+    <div class="section-eyebrow">08 · Backend</div>
+    <h2 class="section-title">Database Schema</h2>
+    <p class="section-sub">5 tables. Clean, normalised, ready for Prisma.</p>
+
+    <!-- Projects Table -->
+    <h3 style="font-size:14px; font-weight:600; color:var(--copper-light); margin-bottom:10px; font-family:var(--font-mono);">TABLE: projects</h3>
+    <table class="schema-table" style="margin-bottom:20px;">
+      <thead><tr><th>Column</th><th>Type</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>id <span class="pk-tag">PK</span></td><td><span class="type-tag">Int</span></td><td>Auto-increment primary key</td></tr>
+        <tr><td>title</td><td><span class="type-tag">String</span></td><td>Project name e.g. "Hushpod"</td></tr>
+        <tr><td>category</td><td><span class="type-tag">String</span></td><td>e.g. "Audio Engineering", "AI/ML", "Web"</td></tr>
+        <tr><td>description</td><td><span class="type-tag">Text</span></td><td>Full project description</td></tr>
+        <tr><td>tech_stack</td><td><span class="type-tag">String[]</span></td><td>Array: ["Python", "WebSockets", "Audio API"]</td></tr>
+        <tr><td>image_url</td><td><span class="type-tag">String</span></td><td>Cloudinary URL</td></tr>
+        <tr><td>live_url</td><td><span class="type-tag">String?</span></td><td>Optional: deployed project URL</td></tr>
+        <tr><td>github_url</td><td><span class="type-tag">String?</span></td><td>Optional: GitHub repo link</td></tr>
+        <tr><td>is_featured</td><td><span class="type-tag">Boolean</span></td><td>If true, shows on Home page teaser</td></tr>
+        <tr><td>display_order</td><td><span class="type-tag">Int</span></td><td>Controls sort order on /work page</td></tr>
+        <tr><td>created_at</td><td><span class="type-tag">DateTime</span></td><td>Auto-set on creation</td></tr>
+      </tbody>
+    </table>
+
+    <!-- Testimonials Table -->
+    <h3 style="font-size:14px; font-weight:600; color:var(--copper-light); margin-bottom:10px; font-family:var(--font-mono);">TABLE: testimonials</h3>
+    <table class="schema-table" style="margin-bottom:20px;">
+      <thead><tr><th>Column</th><th>Type</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>id <span class="pk-tag">PK</span></td><td><span class="type-tag">Int</span></td><td>Auto-increment</td></tr>
+        <tr><td>author_name</td><td><span class="type-tag">String</span></td><td>Reviewer's name</td></tr>
+        <tr><td>project_name</td><td><span class="type-tag">String</span></td><td>Project they're reviewing</td></tr>
+        <tr><td>review_text</td><td><span class="type-tag">Text</span></td><td>The actual testimonial content</td></tr>
+        <tr><td>rating</td><td><span class="type-tag">Int</span></td><td>1–5 star rating</td></tr>
+        <tr><td>is_approved</td><td><span class="type-tag">Boolean</span></td><td>Default false — must be approved via admin</td></tr>
+        <tr><td>created_at</td><td><span class="type-tag">DateTime</span></td><td>Submission timestamp</td></tr>
+      </tbody>
+    </table>
+
+    <!-- Leads Table -->
+    <h3 style="font-size:14px; font-weight:600; color:var(--copper-light); margin-bottom:10px; font-family:var(--font-mono);">TABLE: leads (contact submissions)</h3>
+    <table class="schema-table" style="margin-bottom:20px;">
+      <thead><tr><th>Column</th><th>Type</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>id <span class="pk-tag">PK</span></td><td><span class="type-tag">Int</span></td><td>Auto-increment</td></tr>
+        <tr><td>name</td><td><span class="type-tag">String</span></td><td>Client's full name</td></tr>
+        <tr><td>email</td><td><span class="type-tag">String</span></td><td>Client's email</td></tr>
+        <tr><td>service</td><td><span class="type-tag">String</span></td><td>Selected service category</td></tr>
+        <tr><td>budget</td><td><span class="type-tag">String</span></td><td>Selected budget range</td></tr>
+        <tr><td>message</td><td><span class="type-tag">Text</span></td><td>Project requirements description</td></tr>
+        <tr><td>is_read</td><td><span class="type-tag">Boolean</span></td><td>Admin marks as read — default false</td></tr>
+        <tr><td>created_at</td><td><span class="type-tag">DateTime</span></td><td>Submission timestamp</td></tr>
+      </tbody>
+    </table>
+
+    <!-- Admin Table -->
+    <h3 style="font-size:14px; font-weight:600; color:var(--copper-light); margin-bottom:10px; font-family:var(--font-mono);">TABLE: admin_users</h3>
+    <table class="schema-table" style="margin-bottom:20px;">
+      <thead><tr><th>Column</th><th>Type</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>id <span class="pk-tag">PK</span></td><td><span class="type-tag">Int</span></td><td>Auto-increment</td></tr>
+        <tr><td>email</td><td><span class="type-tag">String</span></td><td>Unique. Login email.</td></tr>
+        <tr><td>password_hash</td><td><span class="type-tag">String</span></td><td>bcrypt hashed — never store plain text</td></tr>
+        <tr><td>created_at</td><td><span class="type-tag">DateTime</span></td><td>Account creation</td></tr>
+        <tr><td>last_login</td><td><span class="type-tag">DateTime?</span></td><td>Updated on each login</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout tip">
+      <span class="callout-icon">💡</span>
+      <div><strong style="color:var(--success-light)">Seeding:</strong> Create a seed script (<code>prisma/seed.js</code>) that inserts your 3 existing projects (Hushpod, Smart Campus, Genome Storage) and creates the initial admin user with a hashed password. Run it once after DB setup.</div>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════
+       SECTION 9 — API REFERENCE
+  ════════════════════════════════════ -->
+  <section class="section" id="api">
+    <div class="section-eyebrow">09 · Backend</div>
+    <h2 class="section-title">API Reference</h2>
+    <p class="section-sub">All 18 endpoints. Base URL: <code style="font-family:var(--font-mono); color:var(--copper-light);">https://api.zentryhub.in/api</code></p>
+
+    <p style="font-size:13px; font-weight:600; color:var(--gray-400); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:10px;">Authentication</p>
+    <div class="route-list" style="margin-bottom:24px;">
+      <div class="route">
+        <span class="method post">POST</span>
+        <span class="route-path">/auth/login</span>
+        <span class="route-desc">Admin login. Returns JWT in httpOnly cookie. Rate limited to 10 req/15min.</span>
+      </div>
+      <div class="route">
+        <span class="method post">POST</span>
+        <span class="route-path">/auth/logout</span>
+        <span class="route-desc">Clears the auth cookie. Protected route.</span>
+      </div>
+      <div class="route">
+        <span class="method get">GET</span>
+        <span class="route-path">/auth/me</span>
+        <span class="route-desc">Verify JWT and return admin info. Used by frontend to check login state.</span>
+      </div>
+    </div>
+
+    <p style="font-size:13px; font-weight:600; color:var(--gray-400); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:10px;">Projects</p>
+    <div class="route-list" style="margin-bottom:24px;">
+      <div class="route">
+        <span class="method get">GET</span>
+        <span class="route-path">/projects</span>
+        <span class="route-desc">All published projects. Optional query: <code>?category=AI&featured=true</code></span>
+      </div>
+      <div class="route">
+        <span class="method get">GET</span>
+        <span class="route-path">/projects/:id</span>
+        <span class="route-desc">Single project by ID.</span>
+      </div>
+      <div class="route">
+        <span class="method post">POST</span>
+        <span class="route-path">/projects</span>
+        <span class="route-desc">Create new project. 🔒 Admin only. Accepts multipart/form-data (image upload to Cloudinary).</span>
+      </div>
+      <div class="route">
+        <span class="method put">PUT</span>
+        <span class="route-path">/projects/:id</span>
+        <span class="route-desc">Update project. 🔒 Admin only.</span>
+      </div>
+      <div class="route">
+        <span class="method delete">DELETE</span>
+        <span class="route-path">/projects/:id</span>
+        <span class="route-desc">Delete project. 🔒 Admin only. Also deletes image from Cloudinary.</span>
+      </div>
+    </div>
+
+    <p style="font-size:13px; font-weight:600; color:var(--gray-400); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:10px;">Testimonials</p>
+    <div class="route-list" style="margin-bottom:24px;">
+      <div class="route">
+        <span class="method get">GET</span>
+        <span class="route-path">/testimonials</span>
+        <span class="route-desc">All approved testimonials only. Public.</span>
+      </div>
+      <div class="route">
+        <span class="method get">GET</span>
+        <span class="route-path">/testimonials/pending</span>
+        <span class="route-desc">All pending (unapproved) submissions. 🔒 Admin only.</span>
+      </div>
+      <div class="route">
+        <span class="method post">POST</span>
+        <span class="route-path">/testimonials</span>
+        <span class="route-desc">Public submission. Goes into pending queue. Rate limited to 3/hour per IP.</span>
+      </div>
+      <div class="route">
+        <span class="method put">PUT</span>
+        <span class="route-path">/testimonials/:id/approve</span>
+        <span class="route-desc">Approve a pending testimonial. 🔒 Admin only.</span>
+      </div>
+      <div class="route">
+        <span class="method delete">DELETE</span>
+        <span class="route-path">/testimonials/:id</span>
+        <span class="route-desc">Delete testimonial (approve/reject action). 🔒 Admin only.</span>
+      </div>
+    </div>
+
+    <p style="font-size:13px; font-weight:600; color:var(--gray-400); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:10px;">Contact / Leads</p>
+    <div class="route-list" style="margin-bottom:24px;">
+      <div class="route">
+        <span class="method post">POST</span>
+        <span class="route-path">/contact</span>
+        <span class="route-desc">Submit contact form. Saves to leads table + sends email notification via Resend. Rate limited to 5/hour per IP.</span>
+      </div>
+      <div class="route">
+        <span class="method get">GET</span>
+        <span class="route-path">/leads</span>
+        <span class="route-desc">All contact submissions. 🔒 Admin only. Sorted by created_at desc.</span>
+      </div>
+      <div class="route">
+        <span class="method put">PUT</span>
+        <span class="route-path">/leads/:id/read</span>
+        <span class="route-desc">Mark lead as read. 🔒 Admin only.</span>
+      </div>
+    </div>
+
+    <div class="callout warning">
+      <span class="callout-icon">⚠</span>
+      <div>All <strong style="color:var(--copper-light)">🔒 Admin only</strong> routes require the JWT cookie to be present and valid. The middleware checks it before the route handler runs. If the cookie is missing or expired, return 401 immediately.</div>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════
+       AUTH
+  ════════════════════════════════════ -->
+  <section class="section" id="auth">
+    <div class="section-eyebrow">10 · Backend</div>
+    <h2 class="section-title">Authentication System</h2>
+    <p class="section-sub">Simple, secure, no third-party auth service needed.</p>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Login Flow</div>
+        <div class="card-body">
+          1. Admin POSTs email + password to <code>/auth/login</code><br>
+          2. Server finds admin by email, compares password with bcrypt<br>
+          3. On match: sign a JWT (7-day expiry) with admin ID as payload<br>
+          4. Set JWT in <strong>httpOnly cookie</strong> (not localStorage — prevents XSS)<br>
+          5. Return 200 + admin info (without password hash)
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Protected Routes</div>
+        <div class="card-body">
+          Every admin API route uses an <code>authMiddleware</code> that:<br>
+          1. Reads the JWT from <code>req.cookies.token</code><br>
+          2. Verifies it with <code>jwt.verify(token, JWT_SECRET)</code><br>
+          3. Attaches admin to <code>req.admin</code><br>
+          4. Calls <code>next()</code> — or returns 401 if invalid/missing
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Frontend Guard</div>
+        <div class="card-body">
+          <code>ProtectedRoute.jsx</code> calls <code>GET /auth/me</code> on mount.<br>
+          If 401 → redirect to <code>/admin/login</code><br>
+          If 200 → render children (dashboard)<br>
+          Shows a spinner during the check. Never shows dashboard content before auth is confirmed.
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Brute Force Protection</div>
+        <div class="card-body">
+          Rate limit <code>/auth/login</code> to 10 attempts per 15 minutes per IP using <code>express-rate-limit</code>.<br>
+          After 10 fails: return 429 with a "Too many attempts" message.<br>
+          Never reveal whether email or password was wrong — always say "Invalid credentials."
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+
+  <!-- ════════════════════════════════════
+       SECTION 11 — DEPLOYMENT
+  ════════════════════════════════════ -->
+  <section class="section" id="deploy">
+    <div class="section-eyebrow">11 · Infrastructure</div>
+    <h2 class="section-title">Deployment Architecture</h2>
+    <p class="section-sub">All free tiers. Professional setup.</p>
+
+    <div class="grid-3" style="margin-bottom:20px;">
+      <div class="card" style="border-color:rgba(184,115,51,0.25);">
+        <div class="card-title" style="color:var(--copper-light);">Frontend → Vercel</div>
+        <div class="card-body">Free tier. Push to GitHub → auto-deploy. Custom domain. Global CDN. HTTPS auto-configured. Environment variables via Vercel dashboard.</div>
+      </div>
+      <div class="card" style="border-color:rgba(74,111,165,0.25);">
+        <div class="card-title" style="color:var(--slate-light);">Backend → Render.com</div>
+        <div class="card-body">Free tier. Node.js web service. Connect GitHub repo → auto-deploy on push. Set PORT=10000. Note: free tier sleeps after 15min inactivity — upgrade to Starter ($7/mo) if needed.</div>
+      </div>
+      <div class="card" style="border-color:rgba(82,183,136,0.25);">
+        <div class="card-title" style="color:var(--success-light);">Database → Neon</div>
+        <div class="card-body">Free PostgreSQL. 512MB storage free. Serverless — scales to zero. Copy the connection string to Render env vars as <code>DATABASE_URL</code>.</div>
+      </div>
+    </div>
+
+    <div class="callout info">
+      <span class="callout-icon">ℹ</span>
+      <div><strong style="color:var(--slate-light)">Domain setup:</strong> Register at <strong>Namecheap</strong> or <strong>GoDaddy India</strong>. Point nameservers to <strong>Cloudflare</strong> (free). In Cloudflare: add A record pointing to Render's IP for <code>api.yourdomain.com</code>, and CNAME for <code>www</code> pointing to Vercel. Cloudflare gives you free CDN, SSL, and DDoS protection automatically.</div>
+    </div>
+
+    <div style="margin-top:16px;">
+      <h3 style="font-size:14px; font-weight:600; color:var(--white); margin-bottom:12px;">Environment Variables Checklist</h3>
+      <div class="grid-2">
+        <div>
+          <p style="font-size:12px; color:var(--gray-400); margin-bottom:8px;"><strong style="color:var(--white);">Backend (.env / Render dashboard)</strong></p>
+          <div class="tree" style="padding:14px 18px;">
+<span class="file">DATABASE_URL</span>           <span class="comment"># Neon connection string</span>
+<span class="file">JWT_SECRET</span>             <span class="comment"># 64-char random string</span>
+<span class="file">CLOUDINARY_CLOUD_NAME</span>  <span class="comment"># from Cloudinary dashboard</span>
+<span class="file">CLOUDINARY_API_KEY</span>
+<span class="file">CLOUDINARY_API_SECRET</span>
+<span class="file">RESEND_API_KEY</span>         <span class="comment"># from Resend dashboard</span>
+<span class="file">NOTIFY_EMAIL</span>           <span class="comment"># your email for lead alerts</span>
+<span class="file">FRONTEND_URL</span>           <span class="comment"># https://zentryhub.in</span>
+<span class="file">NODE_ENV</span>               <span class="comment"># production</span>
+          </div>
+        </div>
+        <div>
+          <p style="font-size:12px; color:var(--gray-400); margin-bottom:8px;"><strong style="color:var(--white);">Frontend (.env / Vercel dashboard)</strong></p>
+          <div class="tree" style="padding:14px 18px;">
+<span class="file">VITE_API_URL</span>           <span class="comment"># https://api.zentryhub.in/api</span>
+          </div>
+          <div class="callout tip" style="margin-top:12px;">
+            <span class="callout-icon">💡</span>
+            <div>Vite env vars must be prefixed with <code>VITE_</code> to be accessible in the browser. All others are build-time only.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════
+       SECURITY
+  ════════════════════════════════════ -->
+  <section class="section" id="security">
+    <div class="section-eyebrow">12 · Infrastructure</div>
+    <h2 class="section-title">Security Checklist</h2>
+    <p class="section-sub">Non-negotiable items before going live.</p>
+
+    <div class="security-grid">
+      <div class="security-item">
+        <div class="si-title">Helmet.js on all routes</div>
+        <div class="si-desc">Sets Content-Security-Policy, X-Frame-Options, X-XSS-Protection, and 12 other headers in one line: <code>app.use(helmet())</code>. Blocks most common web attacks.</div>
+      </div>
+      <div class="security-item">
+        <div class="si-title">CORS restricted to your domain</div>
+        <div class="si-desc">Only allow requests from <code>https://zentryhub.in</code>. Block all other origins. Never use <code>origin: '*'</code> in production.</div>
+      </div>
+      <div class="security-item">
+        <div class="si-title">Passwords hashed with bcrypt</div>
+        <div class="si-desc">Use salt rounds of 12. Never store plain text. Never log passwords. The admin user is created via a one-time seed script.</div>
+      </div>
+      <div class="security-item">
+        <div class="si-title">JWT in httpOnly cookie</div>
+        <div class="si-desc">Not in localStorage (XSS vulnerable). Set <code>secure: true</code> (HTTPS only) and <code>sameSite: 'strict'</code>. 7-day expiry.</div>
+      </div>
+      <div class="security-item">
+        <div class="si-title">Input validation on all routes</div>
+        <div class="si-desc">Use Zod or express-validator on every POST/PUT body. Reject unexpected fields. Validate email format, rating range, string lengths. Never trust client input.</div>
+      </div>
+      <div class="security-item">
+        <div class="si-title">Rate limiting on sensitive routes</div>
+        <div class="si-desc">Login: 10 req/15min. Contact form: 5 req/hour. Testimonial submit: 3 req/hour. All per IP. Prevents brute force and spam.</div>
+      </div>
+      <div class="security-item">
+        <div class="si-title">Prisma prevents SQL injection</div>
+        <div class="si-desc">Prisma uses parameterised queries by default. Never use raw SQL with user input. The ORM handles escaping automatically.</div>
+      </div>
+      <div class="security-item">
+        <div class="si-title">Admin route hidden from UI</div>
+        <div class="si-desc">Remove the "LOGIN" link from the public navbar entirely. The /admin/login URL is known only to you. <code>ProtectedRoute</code> handles unauthorised access attempts.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════
+       SEO
+  ════════════════════════════════════ -->
+  <section class="section" id="seo">
+    <div class="section-eyebrow">13 · Infrastructure</div>
+    <h2 class="section-title">SEO & Analytics</h2>
+    <p class="section-sub">Be findable. Be measurable.</p>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">React Helmet (SEO meta tags)</div>
+        <div class="card-body">Install <code>react-helmet-async</code>. Set unique <code>&lt;title&gt;</code> and <code>meta description</code> per page. Add Open Graph tags so LinkedIn/WhatsApp shares show a preview card. Critical for Indian B2B clients who share links on WhatsApp.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Sitemap & robots.txt</div>
+        <div class="card-body">Create <code>public/robots.txt</code> — allow all, disallow <code>/admin</code>. Generate <code>sitemap.xml</code> with all public routes. Submit both to Google Search Console after launch.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Core Web Vitals targets</div>
+        <div class="card-body">LCP &lt; 2.5s: serve images via Cloudinary with WebP. FID &lt; 100ms: no blocking scripts. CLS &lt; 0.1: define image dimensions. Use Vite's code splitting — each route is a lazy-loaded chunk.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Analytics: Plausible or Umami</div>
+        <div class="card-body">Both are free, open-source, GDPR-compliant alternatives to Google Analytics. No cookie banner needed. Umami can be self-hosted on Railway for free. Shows visitors, pages, referrers, countries.</div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+
+  <!-- ════════════════════════════════════
+       SECTION 14 — DEV PHASES
+  ════════════════════════════════════ -->
+  <section class="section" id="phases">
+    <div class="section-eyebrow">14 · Build Plan</div>
+    <h2 class="section-title">Development Phases</h2>
+    <p class="section-sub">Estimated 3–4 weeks working part-time. Each phase is independently deployable.</p>
+
+    <div class="timeline">
+
+      <div class="phase">
+        <div class="phase-num">Phase 1 · Days 1–2</div>
+        <div class="phase-title">Foundation & Config</div>
+        <div class="phase-duration">~6–8 hours</div>
+        <div class="phase-body">Set up both repositories, configure tooling, and get a skeleton running on Vercel + Render before writing any feature code.</div>
+        <ul class="phase-tasks">
+          <li>Create Vite + React project (<code>npm create vite@latest frontend</code>)</li>
+          <li>Create Express project (<code>npm init</code> in /backend folder)</li>
+          <li>Configure Tailwind v4 with full custom theme (all colour tokens as CSS variables)</li>
+          <li>Push both repos to GitHub</li>
+          <li>Connect frontend to Vercel, backend to Render.com</li>
+          <li>Create Neon PostgreSQL database, save connection string</li>
+          <li>Set up Prisma schema with all 4 tables</li>
+          <li>Run first migration (<code>npx prisma migrate dev</code>)</li>
+          <li>Register domain, configure Cloudflare DNS</li>
+          <li>Create Cloudinary account, Resend account</li>
+          <li>Populate all environment variables in both Vercel and Render dashboards</li>
+        </ul>
+      </div>
+
+      <div class="phase">
+        <div class="phase-num">Phase 2 · Days 3–6</div>
+        <div class="phase-title">Backend API (all endpoints)</div>
+        <div class="phase-duration">~12–16 hours</div>
+        <div class="phase-body">Build the entire backend before touching the frontend. Test every endpoint with Postman/Thunder Client. Seed the database with initial data.</div>
+        <ul class="phase-tasks">
+          <li>Install all backend dependencies (see stack table)</li>
+          <li>Configure Helmet, CORS, rate limiting, cookie-parser</li>
+          <li>Build auth routes: POST /login, POST /logout, GET /me</li>
+          <li>Build authMiddleware (JWT verification)</li>
+          <li>Build all project routes (GET, POST, PUT, DELETE)</li>
+          <li>Build all testimonial routes (with approval flow)</li>
+          <li>Build contact route with Resend email notification</li>
+          <li>Build leads routes for admin viewing</li>
+          <li>Configure Cloudinary for image upload middleware</li>
+          <li>Write seed script and seed initial data (3 projects, 1 admin user)</li>
+          <li>Test all endpoints in Postman — verify auth guards work</li>
+        </ul>
+      </div>
+
+      <div class="phase">
+        <div class="phase-num">Phase 3 · Days 7–12</div>
+        <div class="phase-title">Frontend Core Pages</div>
+        <div class="phase-duration">~18–22 hours</div>
+        <div class="phase-body">Build all public-facing pages. Connect to backend API using React Query. Implement all Framer Motion animations.</div>
+        <ul class="phase-tasks">
+          <li>Install all frontend dependencies</li>
+          <li>Build Navbar (correct logo import, scroll effect, mobile menu with positive z-index)</li>
+          <li>Build Footer with social links</li>
+          <li>Build AnimatedSection reusable component (whileInView wrapper)</li>
+          <li>Build Home page — all 5 sections with animations</li>
+          <li>Build Services page — 4 pillars sticky layout</li>
+          <li>Build Work/Portfolio page — DB-driven, category filter</li>
+          <li>Build About page — with actual founder photo via Cloudinary</li>
+          <li>Build Testimonials page — live data + public submission form</li>
+          <li>Build Contact page — React Hook Form + Zod validation + API call</li>
+          <li>Build 404 Not Found page</li>
+          <li>Implement PageTransition wrapper with AnimatePresence</li>
+          <li>Add react-helmet-async meta tags to every page</li>
+        </ul>
+      </div>
+
+      <div class="phase">
+        <div class="phase-num">Phase 4 · Days 13–16</div>
+        <div class="phase-title">Admin Dashboard</div>
+        <div class="phase-duration">~10–14 hours</div>
+        <div class="phase-body">Build the protected admin interface. This is what you'll use daily to manage the site without touching code.</div>
+        <ul class="phase-tasks">
+          <li>Build AdminLogin page with form + error handling</li>
+          <li>Build AuthContext + useAuth hook (stores login state)</li>
+          <li>Build ProtectedRoute component — redirects to /admin/login if not authed</li>
+          <li>Build AdminDashboard layout with sidebar tabs</li>
+          <li>Projects tab: list all, add new (with image upload), edit, delete, toggle featured</li>
+          <li>Testimonials tab: pending queue with approve/reject buttons, approved list</li>
+          <li>Leads tab: paginated table of contact submissions, mark as read</li>
+          <li>Test all admin flows end-to-end</li>
+        </ul>
+      </div>
+
+      <div class="phase">
+        <div class="phase-num">Phase 5 · Days 17–20</div>
+        <div class="phase-title">Polish, Performance & Launch</div>
+        <div class="phase-duration">~8–10 hours</div>
+        <div class="phase-body">The difference between good and professional. Do not skip this phase.</div>
+        <ul class="phase-tasks">
+          <li>Mobile responsiveness audit — test on real device (iPhone + Android)</li>
+          <li>Fix any layout issues on screens &lt; 375px wide</li>
+          <li>Lighthouse audit — target 90+ on all 4 metrics</li>
+          <li>Add lazy loading to all images (<code>loading="lazy"</code>)</li>
+          <li>Add React.lazy + Suspense to all route components (code splitting)</li>
+          <li>Add <code>prefers-reduced-motion</code> check to all Framer Motion animations</li>
+          <li>Generate sitemap.xml, create robots.txt</li>
+          <li>Submit to Google Search Console</li>
+          <li>Cross-browser test: Chrome, Firefox, Safari, Edge</li>
+          <li>Set up Umami analytics on Railway</li>
+          <li>Final content review — replace all placeholder text with real copy</li>
+          <li>Go live 🚀</li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+  <hr class="divider">
+
+
+  <!-- ════════════════════════════════════
+       SECTION 15 — LAUNCH CHECKLIST
+  ════════════════════════════════════ -->
+  <section class="section" id="checklist">
+    <div class="section-eyebrow">15 · Launch</div>
+    <h2 class="section-title">Pre-Launch Checklist</h2>
+    <p class="section-sub">Tick every box before sharing the URL with anyone.</p>
+
+    <div class="grid-2">
+      <div>
+        <p style="font-size:12px; color:var(--gray-400); font-weight:600; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:10px;">Technical</p>
+        <ul class="checklist">
+          <li><span class="check-icon"></span>All 18 API endpoints tested and returning correct data</li>
+          <li><span class="check-icon"></span>Admin login works and JWT cookie is set correctly</li>
+          <li><span class="check-icon"></span>/admin route shows login page (not dashboard) when unauthenticated</li>
+          <li><span class="check-icon"></span>Contact form sends email notification via Resend</li>
+          <li><span class="check-icon"></span>Project image upload works via Cloudinary in admin</li>
+          <li><span class="check-icon"></span>No console errors in browser DevTools on any page</li>
+          <li><span class="check-icon"></span>All env vars set in Vercel and Render dashboards</li>
+          <li><span class="check-icon"></span>HTTPS working on both frontend and API subdomain</li>
+          <li><span class="check-icon"></span>CORS rejecting requests from non-whitelisted origins</li>
+          <li><span class="check-icon"></span>Lighthouse score 90+ on Performance, SEO, Accessibility</li>
+        </ul>
+      </div>
+      <div>
+        <p style="font-size:12px; color:var(--gray-400); font-weight:600; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:10px;">Content & Design</p>
+        <ul class="checklist">
+          <li><span class="check-icon"></span>Actual founder photo uploaded (not Terminal icon placeholder)</li>
+          <li><span class="check-icon"></span>All 3 projects seeded with real descriptions and images</li>
+          <li><span class="check-icon"></span>Contact page shows correct WhatsApp/LinkedIn/email links</li>
+          <li><span class="check-icon"></span>Logo renders correctly on all pages (imported, not bare path)</li>
+          <li><span class="check-icon"></span>All pages have unique meta title + description tags</li>
+          <li><span class="check-icon"></span>Mobile menu opens and closes correctly on iOS and Android</li>
+          <li><span class="check-icon"></span>All internal nav links navigate to correct pages</li>
+          <li><span class="check-icon"></span>Footer social links open in new tab</li>
+          <li><span class="check-icon"></span>404 page displays for unknown routes</li>
+          <li><span class="check-icon"></span>Site tested on Chrome, Safari, Firefox, mobile browsers</li>
+        </ul>
+      </div>
+    </div>
+
+    <div style="margin-top:32px; padding:24px; background:linear-gradient(135deg, rgba(184,115,51,0.08), rgba(74,111,165,0.05)); border:1px solid rgba(184,115,51,0.2); border-radius:var(--radius-xl); text-align:center;">
+      <p style="font-size:22px; font-weight:800; color:var(--white); letter-spacing:-0.02em; margin-bottom:8px;">Ready to start building?</p>
+      <p style="font-size:14px; color:var(--gray-400); margin-bottom:0;">Share this document with me and say <strong style="color:var(--copper-light);">"Start Phase 1"</strong> — I'll generate the exact code for each step, in order.</p>
+    </div>
+  </section>
+
+
+</div>
+</main>
+
+<script>
+  // Highlight active sidebar link on scroll
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav-link');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navLinks.forEach(link => {
+          link.classList.remove('active');
+          if (link.getAttribute('href') === '#' + entry.target.id) {
+            link.classList.add('active');
+          }
+        });
+      }
+    });
+  }, { rootMargin: '-20% 0px -75% 0px' });
+
+  sections.forEach(s => observer.observe(s));
+</script>
+
+</body>
+</html>
+
+
+<!-- 
+
+
+  ███████╗███████╗███╗   ██╗████████╗██████╗ ██╗   ██╗
+     ███╔╝██╔════╝████╗  ██║╚══██╔══╝██╔══██╗╚██╗ ██╔╝
+    ███╔╝ █████╗  ██╔██╗ ██║   ██║   ██████╔╝ ╚████╔╝
+   ███╔╝  ██╔══╝  ██║╚██╗██║   ██║   ██╔══██╗  ╚██╔╝
+  ███████╗███████╗██║ ╚████║   ██║   ██║  ██║   ██║
+  ╚══════╝╚══════╝╚═╝  ╚═══╝   ╚═╝   ╚═╝  ╚═╝   ╚═╝
+
+  ZENTRY HUB — Phase 1 Setup Script
+  Full-Stack Portfolio · React + Node.js + PostgreSQL
+
+
+────────────────────────────────────────────────────────────
+  STEP 0 · Checking Prerequisites
+────────────────────────────────────────────────────────────
+
+  ► Checking Node.js...
+  ✓ Node.js found: v24.13.1
+
+  ► Checking npm...
+  ✓ npm found: v11.7.0
+
+  ► Checking Git...
+  ✓ Git found: git version 2.53.0.windows.1
+
+  ✓ All prerequisites satisfied. Starting setup...
+
+────────────────────────────────────────────────────────────
+  STEP 1 · Setting Up Project Root
+────────────────────────────────────────────────────────────
+
+  ► Navigating to: D:\zentry_hub_projects\zentry_portfolio
+  ✓ Working directory: D:\zentry_hub_projects\zentry_portfolio
+
+────────────────────────────────────────────────────────────
+  STEP 2 · Creating Frontend (Vite + React)
+────────────────────────────────────────────────────────────
+
+  ► Scaffolding Vite project into /frontend ...
+
+> npx
+> create-vite frontend --template react
+
+│
+◇  Target directory "frontend" is not empty. Please choose how to proceed:
+│  Ignore files and continue
+│
+◇  Install with npm and start now?
+│  No
+│
+◇  Scaffolding project in D:\zentry_hub_projects\zentry_portfolio\frontend...
+│
+└  Done. Now run:
+
+  cd frontend
+  npm install
+  npm run dev
+
+  ✓ Vite project created
+
+  ► Installing frontend dependencies...
+
+up to date, audited 137 packages in 2s
+
+31 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+  ✓ Base dependencies installed
+
+────────────────────────────────────────────────────────────
+  STEP 3 · Installing Frontend Packages
+────────────────────────────────────────────────────────────
+
+  ► Installing routing, animation, state, forms...
+npm error code ERESOLVE
+npm error ERESOLVE unable to resolve dependency tree
+npm error
+npm error While resolving: frontend@0.0.0
+npm error Found: react@19.2.5
+npm error node_modules/react
+npm error   react@"^19.2.5" from the root project
+npm error
+npm error Could not resolve dependency:
+npm error peer react@"^16.3.3 || ^17.0.0 || ^18.0.0" from cloudinary-react@1.8.1
+npm error node_modules/cloudinary-react
+npm error   cloudinary-react@"*" from the root project
+npm error
+npm error Fix the upstream dependency conflict, or retry
+npm error this command with --force or --legacy-peer-deps
+npm error to accept an incorrect (and potentially broken) dependency resolution.
+npm error
+npm error
+npm error For a full report see:
+npm error C:\Users\az\AppData\Local\npm-cache\_logs\2026-05-02T03_00_55_410Z-eresolve-report.txt
+npm error A complete log of this run can be found in: C:\Users\az\AppData\Local\npm-cache\_logs\2026-05-02T03_00_55_410Z-debug-0.log
+  ✓ Core feature packages installed
+
+  ► Installing Tailwind CSS v3 + plugins...
+
+added 8 packages, and audited 145 packages in 7s
+
+33 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+  ✓ Tailwind and PostCSS installed
+
+  ► Running Tailwind init...
+npm error could not determine executable to run
+npm error A complete log of this run can be found in: C:\Users\az\AppData\Local\npm-cache\_logs\2026-05-02T03_01_14_822Z-debug-0.log
+  ✓ tailwind.config.js and postcss.config.js created
+
+────────────────────────────────────────────────────────────
+  STEP 4 · Writing Frontend Config Files
+────────────────────────────────────────────────────────────
+
+  ► Writing tailwind.config.js with full Zentry theme...
+  ✓ tailwind.config.js written
+
+  ► Writing index.css with Google Fonts + Tailwind directives...
+  ✓ src/index.css written
+
+  ► Writing vite.config.js...
+  ✓ vite.config.js written
+
+  ► Writing .env files...
+  ✓ .env.example and .env.local created                                                                                 
+
+  ► Writing .gitignore...
+  ✓ .gitignore written
+
+────────────────────────────────────────────────────────────
+  STEP 5 · Creating Frontend Folder Structure
+────────────────────────────────────────────────────────────
+
+  ► Creating all src/ directories...
+    + src\assets\images
+    + src\assets\icons
+    + src\components\layout
+    + src\components\ui
+    + src\components\home
+    + src\components\work
+    + src\components\admin
+    + src\pages\admin
+    + src\hooks
+    + src\services
+    + src\context
+    + src\utils
+  ✓ All frontend directories created
+
+────────────────────────────────────────────────────────────
+  STEP 6 · Writing Frontend Source Files
+────────────────────────────────────────────────────────────
+
+  ► Writing App.jsx...
+  ✓ src/App.jsx written
+  ✓ src/main.jsx written
+
+  ► Writing services/api.js (Axios instance)...
+  ✓ All service files written
+
+  ► Writing context/AuthContext.jsx...
+  ✓ AuthContext.jsx written
+
+  ► Writing hooks...
+  ✓ Hook files written
+
+  ► Writing utils/validators.js (Zod schemas)...
+  ✓ validators.js written
+
+  ► Writing layout component stubs...
+  ✓ Layout components written
+
+  ► Writing UI components...
+  ✓ UI components written
+
+  ► Writing admin components...
+  ✓ Admin ProtectedRoute written
+
+  ► Writing page stubs...
+  ✓ All page files written
+
+────────────────────────────────────────────────────────────
+  STEP 7 · Creating Backend (Node.js + Express)
+────────────────────────────────────────────────────────────
+Set-Location: 
+Line |
+1208 |  Set-Location "$ROOT\backend"
+     |  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     | Cannot find path 'D:\zentry_hub_projects\zentry_portfolio\backend' because it does not exist.
+
+  ► Initialising package.json...
+Wrote to D:\zentry_hub_projects\zentry_portfolio\frontend\package.json:
+
+{
+  "name": "frontend",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@tailwindcss/typography": "^0.5.19",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.1",
+    "autoprefixer": "^10.5.0",
+    "eslint": "^10.2.1",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.2",
+    "globals": "^17.5.0",
+    "postcss": "^8.5.13",
+    "tailwindcss": "^4.2.4",
+    "vite": "^8.0.10"
+  },
+  "description": "This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.",   
+  "main": "eslint.config.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
+
+
+  ✓ package.json created
+
+  ► Installing backend production dependencies...
+npm warn deprecated q@1.5.1: You or someone you depend on is using Q, the JavaScript Promise library that gave JavaScript developers strong feelings about promises. They can almost certainly migrate to the native JavaScript promise now. Thank you literally everyone for joining me in this bet against the odds. Be excellent to each other.
+npm warn deprecated
+npm warn deprecated (For a CapTP with native promises, see @endo/eventual-send and @endo/captp)
+npm warn deprecated uuid@10.0.0: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
+
+added 116 packages, and audited 261 packages in 48s
+
+62 packages are looking for funding
+  run `npm fund` for details
+
+5 vulnerabilities (3 moderate, 2 high)
+
+To address all issues, run:
+  npm audit fix
+
+Run `npm audit` for details.
+  ✓ Production dependencies installed
+
+  ► Installing backend dev dependencies...
+
+added 103 packages, and audited 364 packages in 1m
+
+78 packages are looking for funding
+  run `npm fund` for details
+
+8 vulnerabilities (6 moderate, 2 high)
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+  ✓ Dev dependencies installed
+
+  ► Updating package.json scripts...
+SetValueInvocationException: 
+Line |
+1243 |  $pkgJson.scripts.start   = "node src/server.js"
+     |  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     | Exception setting "start": "The property 'start' cannot be found on this object. Verify that the property exists and can be set."
+SetValueInvocationException: 
+Line |
+1245 |  $pkgJson.scripts.migrate = "npx prisma migrate dev"
+     |  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     | Exception setting "migrate": "The property 'migrate' cannot be found on this object. Verify that the property exists and can be set."
+SetValueInvocationException: 
+Line |
+1246 |  $pkgJson.scripts.seed    = "node prisma/seed.js"
+     |  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     | Exception setting "seed": "The property 'seed' cannot be found on this object. Verify that the property exists and can be set."
+SetValueInvocationException: 
+Line |
+1247 |  $pkgJson.scripts.studio  = "npx prisma studio"
+     |  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     | Exception setting "studio": "The property 'studio' cannot be found on this object. Verify that the property exists and can be set."
+  ✓ package.json scripts updated
+
+────────────────────────────────────────────────────────────
+  STEP 8 · Creating Backend Folder Structure
+────────────────────────────────────────────────────────────
+    + src\routes
+    + src\middleware
+    + src\controllers
+    + src\services
+    + src\utils
+    + src\config
+    + prisma
+  ✓ Backend directories created
+
+────────────────────────────────────────────────────────────
+  STEP 9 · Writing Backend Source Files
+────────────────────────────────────────────────────────────
+
+  ► Writing .env files...
+  ✓ .env.example and .env created                                                                                       
+
+  ► Writing Prisma schema...
+  ✓ schema.prisma written
+
+  ► Writing prisma/seed.js...
+  ✓ seed.js written
+
+  ► Writing config files...
+  ✓ Config files written
+
+  ► Writing middleware...
+  ✓ Middleware written
+
+  ► Writing route files...
+  ✓ All route files written
+
+  ► Writing src/server.js (main entry point)...
+  ✓ server.js written
+
+────────────────────────────────────────────────────────────
+  STEP 10 · Initialising Git Repositories
+────────────────────────────────────────────────────────────
+  ✓ Git initialised in /frontend
+Set-Location: 
+Line |
+1941 |  Set-Location "$ROOT\backend"
+     |  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     | Cannot find path 'D:\zentry_hub_projects\zentry_portfolio\backend' because it does not exist.
+  ✓ Git initialised in /backend
+
+────────────────────────────────────────────────────────────
+  PHASE 1 COMPLETE ✓
+────────────────────────────────────────────────────────────
+
+  📁 Project root: D:\zentry_hub_projects\zentry_portfolio
+
+  FRONTEND (D:\zentry_hub_projects\zentry_portfolio\frontend)
+    Files:       App.jsx, main.jsx, all pages, all services, auth context
+    Config:      tailwind.config.js, vite.config.js, .env.local
+    Packages:    React 18, Vite 5, Tailwind, Framer Motion, React Query
+                 React Router, React Hook Form, Zod, Axios, Lucide
+
+  BACKEND (D:\zentry_hub_projects\zentry_portfolio\backend)
+    Files:       server.js, all routes, middleware, Prisma schema, seed
+    Packages:    Express, Prisma, JWT, bcrypt, Helmet, CORS, Cloudinary
+                 Resend, Rate Limiter, Multer, Cookie-Parser
+
+  ─────────────────────────────────────────────────────────
+  NEXT STEPS:
+
+  1. FILL IN your .env file in /backend:
+     → Neon DATABASE_URL, JWT_SECRET, Cloudinary keys, Resend key
+
+  2. ADD your logo.png to:
+     → D:\zentry_hub_projects\zentry_portfolio\frontend\src\assets\images\logo.png
+
+  3. GENERATE Prisma client:
+     cd D:\zentry_hub_projects\zentry_portfolio\backend
+     npx prisma generate
+
+  4. RUN migrations (after filling DATABASE_URL):
+     npx prisma migrate dev --name init
+
+  5. SEED the database:
+     npm run seed
+
+  6. START backend (Terminal 1):
+     cd D:\zentry_hub_projects\zentry_portfolio\backend  &&  npm run dev
+
+  7. START frontend (Terminal 2):
+     cd D:\zentry_hub_projects\zentry_portfolio\frontend  &&  npm run dev
+
+  8. OPEN in browser:
+     http://localhost:3000
+
+  ─────────────────────────────────────────────────────────
+  Ready for Phase 2 (Backend API) when you say 'Start Phase 2' -->
