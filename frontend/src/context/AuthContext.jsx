@@ -4,15 +4,43 @@ import { adminApi } from '@/services/adminApi'
 const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
-  const [admin, setAdmin]       = useState(null)
-  const [loading, setLoading]   = useState(true)
+  const [admin, setAdmin]     = useState(null)
+  const [loading, setLoading] = useState(true)
 
   // On mount — check if JWT cookie is still valid
+  // Timeout after 5 seconds so it never hangs
   useEffect(() => {
+    let cancelled = false
+
+    const timeout = setTimeout(() => {
+      if (!cancelled) {
+        setAdmin(null)
+        setLoading(false)
+      }
+    }, 5000)
+
     adminApi.me()
-      .then(res => setAdmin(res.data))
-      .catch(() => setAdmin(null))
-      .finally(() => setLoading(false))
+      .then(res => {
+        if (!cancelled) {
+          setAdmin(res.data)
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setAdmin(null)
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          clearTimeout(timeout)
+          setLoading(false)
+        }
+      })
+
+    return () => {
+      cancelled = true
+      clearTimeout(timeout)
+    }
   }, [])
 
   const login = async (email, password) => {
@@ -22,8 +50,14 @@ export function AuthProvider({ children }) {
   }
 
   const logout = async () => {
-    await adminApi.logout()
+    try {
+      await adminApi.logout()
+    } catch {
+      // ignore logout errors
+    }
     setAdmin(null)
+    // Clear any stale cookies
+    document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
   }
 
   return (
