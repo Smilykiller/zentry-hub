@@ -5,44 +5,45 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { contactSchema } from '@/utils/validators'
 import { contactApi } from '@/services/contactApi'
-import { ArrowUpRight, CheckCircle, MapPin, Mail, MessageSquare } from 'lucide-react'
+import { ArrowUpRight, CheckCircle, MapPin, Mail, Clock } from 'lucide-react'
 
-const fadeUp = {
-  hidden:  { opacity:0, y:36 },
-  visible: (i=0) => ({ opacity:1, y:0, transition:{ duration:0.7, delay:i*0.1, ease:[0.16,1,0.3,1] } })
+const T = {
+  bg:'#08090B', surface:'#0F1117', card:'#141820',
+  border:'#1E2535', borderL:'#2A3446',
+  copper:'#C4843A', copperL:'#E09B52', copperD:'#8A5C28',
+  slate:'#4A6FA5', white:'#F2EFE9', gray:'#8A97AB', grayD:'#404B5C',
 }
 
-const services = [
-  'Full-Stack Web Engineering',
-  'AI & Machine Learning',
-  'Specialised Domain Systems',
-  'Data Architecture',
-  'Technical Consulting',
-  'Maintenance & Support',
-  'Not sure yet',
-]
+function Reveal({ children, delay=0, y=28, style={} }) {
+  return (
+    <motion.div initial={{opacity:0,y}} whileInView={{opacity:1,y:0}}
+      viewport={{once:true,amount:0.15}}
+      transition={{duration:0.75,delay,ease:[0.16,1,0.3,1]}} style={style}>
+      {children}
+    </motion.div>
+  )
+}
 
-const budgets = [
-  'Under ₹50,000',
-  '₹50,000 – ₹2,00,000',
-  '₹2,00,000 – ₹5,00,000',
-  '₹5,00,000+',
-  'Let\'s discuss',
-]
-
-const inputStyle = {
-  width:'100%',
-  background:'#0D1117',
-  border:'1px solid #2A3446',
-  color:'#F0EDE8',
-  padding:'16px 20px',
+const inputBase = {
+  width:'100%', background:T.surface,
+  border:`1px solid ${T.border}`,
+  color:T.white, padding:'14px 16px',
   fontFamily:"'Space Grotesk',sans-serif",
-  fontSize:15, fontWeight:400,
-  outline:'none',
+  fontSize:15, outline:'none',
   transition:'border-color 0.2s',
-  borderRadius:0,
-  appearance:'none',
+  borderRadius:0, appearance:'none',
 }
+
+const SERVICES = [
+  'Full-Stack Web Engineering','AI & Machine Learning',
+  'Niche Domain Systems','Data Architecture',
+  'Technical Consulting','Maintenance & Support','Not sure yet',
+]
+
+const BUDGETS = [
+  'Under ₹50,000','₹50,000 – ₹2,00,000',
+  '₹2,00,000 – ₹5,00,000','₹5,00,000+','Let\'s discuss',
+]
 
 export default function Contact() {
   const [submitted, setSubmitted] = useState(false)
@@ -57,233 +58,181 @@ export default function Contact() {
       setServerError('')
       await contactApi.submit(data)
       setSubmitted(true)
-    } catch (e) {
+    } catch(e) {
       setServerError(e?.response?.data?.error || 'Something went wrong. Please try again.')
     }
   }
+
+  const Field = ({ label, error, children }) => (
+    <div>
+      <label style={{fontFamily:"'Fragment Mono',monospace",fontSize:9,color:T.grayD,letterSpacing:'0.2em',textTransform:'uppercase',display:'block',marginBottom:10}}>
+        {label}
+      </label>
+      {children}
+      {error && <p style={{fontFamily:"'Fragment Mono',monospace",fontSize:10,color:'#E07070',marginTop:6}}>{error}</p>}
+    </div>
+  )
 
   return (
     <>
       <Helmet>
         <title>Contact — Zentry Hub</title>
-        <meta name="description" content="Start a project with Zentry Hub. Tell us what you're building." />
+        <meta name="description" content="Start a project with Zentry Hub. Tell us what you're building."/>
       </Helmet>
 
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@300;400;500;600;700&family=Fragment+Mono&family=DM+Serif+Display:ital@0;1&display=swap');
-        input:focus,select:focus,textarea:focus{ border-color:rgba(184,115,51,0.6)!important; }
-        input::placeholder,textarea::placeholder{ color:#2A3446; }
-        select option{ background:#161B22; color:#F0EDE8; }
-        @media(max-width:900px){ .contact-grid{ grid-template-columns:1fr!important; } }
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+        .container{max-width:1200px;margin:0 auto;width:100%;}
+        input:focus,select:focus,textarea:focus{border-color:rgba(196,132,58,0.6)!important;outline:none;}
+        input::placeholder,textarea::placeholder{color:#2A3446;}
+        select option{background:#141820;color:#F2EFE9;}
+        @keyframes spin{to{transform:rotate(360deg)}}
+        @media(max-width:768px){
+          .contact-grid{grid-template-columns:1fr!important;}
+          .form-row{grid-template-columns:1fr!important;}
+        }
+        @media(max-width:480px){.hero-pad{padding:100px 20px 60px!important;}.form-pad{padding:0 20px 80px!important;}}
       `}</style>
 
       {/* HERO */}
-      <section style={{
-        minHeight:'55vh', background:'#0D1117',
-        display:'flex', flexDirection:'column', justifyContent:'flex-end',
-        padding:'120px 2.5rem 80px', position:'relative', overflow:'hidden',
-      }}>
-        <div style={{
-          position:'absolute', bottom:-60, right:-40,
-          fontFamily:"'Bebas Neue',sans-serif",
-          fontSize:'clamp(140px,28vw,380px)',
-          color:'rgba(74,111,165,0.04)',
-          lineHeight:1, userSelect:'none', pointerEvents:'none',
-          letterSpacing:'-0.05em',
-        }}>TALK</div>
-
-        <div style={{ maxWidth:1280, margin:'0 auto', width:'100%' }}>
-          <motion.p variants={fadeUp} initial="hidden" animate="visible" custom={0}
-            style={{ fontFamily:"'Fragment Mono',monospace", fontSize:11, color:'#B87333', letterSpacing:'0.25em', textTransform:'uppercase', marginBottom:24 }}>
-            Get in touch
-          </motion.p>
-          <motion.h1 variants={fadeUp} initial="hidden" animate="visible" custom={1}
-            style={{
-              fontFamily:"'Bebas Neue',sans-serif",
-              fontSize:'clamp(64px,12vw,160px)',
-              letterSpacing:'-0.02em', lineHeight:0.9, color:'#F0EDE8', marginBottom:40,
-            }}>
-            Let's build<br/>
-            <span style={{ fontFamily:"'DM Serif Display',serif", fontStyle:'italic', color:'#B87333' }}>
+      <section className="hero-pad" style={{background:T.bg,padding:'140px 48px 80px',position:'relative',overflow:'hidden'}}>
+        <div style={{position:'absolute',bottom:-40,right:-40,fontFamily:"'Bebas Neue',sans-serif",fontSize:'clamp(120px,20vw,280px)',color:'rgba(74,111,165,0.03)',letterSpacing:'-0.05em',lineHeight:1,userSelect:'none',pointerEvents:'none'}}>TALK</div>
+        <div className="container">
+          <Reveal>
+            <p style={{fontFamily:"'Fragment Mono',monospace",fontSize:10,color:T.copper,letterSpacing:'0.22em',textTransform:'uppercase',marginBottom:20}}>Get in touch</p>
+          </Reveal>
+          <div style={{overflow:'hidden'}}>
+            <motion.h1 initial={{y:'105%'}} animate={{y:'0%'}} transition={{duration:1,delay:0.1,ease:[0.16,1,0.3,1]}}
+              style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:'clamp(52px,9vw,128px)',letterSpacing:'-0.025em',lineHeight:0.9,color:T.white}}>
+              Let's build
+            </motion.h1>
+          </div>
+          <div style={{overflow:'hidden'}}>
+            <motion.h1 initial={{y:'105%'}} animate={{y:'0%'}} transition={{duration:1,delay:0.18,ease:[0.16,1,0.3,1]}}
+              style={{fontFamily:"'DM Serif Display',serif",fontStyle:'italic',fontSize:'clamp(46px,8vw,112px)',letterSpacing:'-0.02em',lineHeight:0.95,color:T.copper}}>
               something real.
-            </span>
-          </motion.h1>
-        </div>
-      </section>
-
-      {/* MAIN CONTENT */}
-      <section style={{ background:'#0D1117', padding:'0 2.5rem 140px', borderTop:'1px solid #2A3446' }}>
-        <div style={{ maxWidth:1280, margin:'0 auto' }}>
-          <div className="contact-grid" style={{ display:'grid', gridTemplateColumns:'1fr 1.6fr', gap:80, paddingTop:80 }}>
-
-            {/* LEFT — info */}
-            <div>
-              <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once:true }}>
-                <p style={{
-                  fontFamily:"'Space Grotesk',sans-serif",
-                  fontSize:18, color:'#8B9DB5', lineHeight:1.8,
-                  fontWeight:300, marginBottom:56,
-                }}>
-                  Tell us what you're building. We'll tell you if we're the right studio to build it with — honestly, even if the answer is no.
-                </p>
-
-                {/* Contact details */}
-                <div style={{ display:'flex', flexDirection:'column', gap:32 }}>
-                  {[
-                    { icon:<MapPin size={16}/>, label:'Location', val:'Coimbatore, Tamil Nadu, India' },
-                    { icon:<Mail size={16}/>, label:'Email', val:'hello@zentryhub.in' },
-                    { icon:<MessageSquare size={16}/>, label:'Response time', val:'Within 24 hours' },
-                  ].map(item => (
-                    <div key={item.label} style={{ display:'flex', gap:16, alignItems:'flex-start' }}>
-                      <div style={{
-                        width:36, height:36, flexShrink:0,
-                        border:'1px solid #2A3446',
-                        display:'flex', alignItems:'center', justifyContent:'center',
-                        color:'#B87333',
-                      }}>
-                        {item.icon}
-                      </div>
-                      <div>
-                        <p style={{ fontFamily:"'Fragment Mono',monospace", fontSize:10, color:'#4A5568', letterSpacing:'0.15em', textTransform:'uppercase', marginBottom:4 }}>
-                          {item.label}
-                        </p>
-                        <p style={{ fontFamily:"'Space Grotesk',sans-serif", fontSize:14, color:'#8B9DB5' }}>
-                          {item.val}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </motion.div>
-            </div>
-
-            {/* RIGHT — form */}
-            <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once:true }} custom={1}>
-              {submitted ? (
-                <motion.div
-                  initial={{ opacity:0, scale:0.95 }}
-                  animate={{ opacity:1, scale:1 }}
-                  style={{
-                    border:'1px solid rgba(82,183,136,0.3)',
-                    background:'rgba(82,183,136,0.05)',
-                    padding:'64px 48px', textAlign:'center',
-                  }}
-                >
-                  <CheckCircle size={48} color="#52B788" style={{ marginBottom:24 }}/>
-                  <h3 style={{
-                    fontFamily:"'Bebas Neue',sans-serif",
-                    fontSize:48, letterSpacing:'0.03em',
-                    color:'#F0EDE8', marginBottom:16, lineHeight:1,
-                  }}>
-                    Message Received.
-                  </h3>
-                  <p style={{ fontFamily:"'Space Grotesk',sans-serif", fontSize:16, color:'#8B9DB5', lineHeight:1.7 }}>
-                    We've got your enquiry and will respond within 24 hours. We look forward to hearing more about what you're building.
-                  </p>
-                </motion.div>
-              ) : (
-                <form onSubmit={handleSubmit(onSubmit)} style={{ display:'flex', flexDirection:'column', gap:24 }}>
-
-                  {/* Name + Email row */}
-                  <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:16 }}>
-                    <div>
-                      <label style={{ fontFamily:"'Fragment Mono',monospace", fontSize:10, color:'#4A5568', letterSpacing:'0.18em', textTransform:'uppercase', display:'block', marginBottom:10 }}>
-                        Full Name *
-                      </label>
-                      <input {...register('name')} placeholder="Your name" style={inputStyle}/>
-                      {errors.name && <p style={{ fontFamily:"'Fragment Mono',monospace", fontSize:10, color:'#E07070', marginTop:6 }}>{errors.name.message}</p>}
-                    </div>
-                    <div>
-                      <label style={{ fontFamily:"'Fragment Mono',monospace", fontSize:10, color:'#4A5568', letterSpacing:'0.18em', textTransform:'uppercase', display:'block', marginBottom:10 }}>
-                        Email *
-                      </label>
-                      <input {...register('email')} type="email" placeholder="your@email.com" style={inputStyle}/>
-                      {errors.email && <p style={{ fontFamily:"'Fragment Mono',monospace", fontSize:10, color:'#E07070', marginTop:6 }}>{errors.email.message}</p>}
-                    </div>
-                  </div>
-
-                  {/* Service */}
-                  <div>
-                    <label style={{ fontFamily:"'Fragment Mono',monospace", fontSize:10, color:'#4A5568', letterSpacing:'0.18em', textTransform:'uppercase', display:'block', marginBottom:10 }}>
-                      Service *
-                    </label>
-                    <select {...register('service')} style={{ ...inputStyle, cursor:'pointer' }}>
-                      <option value="">Select a service...</option>
-                      {services.map(s => <option key={s} value={s}>{s}</option>)}
-                    </select>
-                    {errors.service && <p style={{ fontFamily:"'Fragment Mono',monospace", fontSize:10, color:'#E07070', marginTop:6 }}>{errors.service.message}</p>}
-                  </div>
-
-                  {/* Budget */}
-                  <div>
-                    <label style={{ fontFamily:"'Fragment Mono',monospace", fontSize:10, color:'#4A5568', letterSpacing:'0.18em', textTransform:'uppercase', display:'block', marginBottom:10 }}>
-                      Budget Range
-                    </label>
-                    <select {...register('budget')} style={{ ...inputStyle, cursor:'pointer' }}>
-                      <option value="">Select a range...</option>
-                      {budgets.map(b => <option key={b} value={b}>{b}</option>)}
-                    </select>
-                  </div>
-
-                  {/* Message */}
-                  <div>
-                    <label style={{ fontFamily:"'Fragment Mono',monospace", fontSize:10, color:'#4A5568', letterSpacing:'0.18em', textTransform:'uppercase', display:'block', marginBottom:10 }}>
-                      Project Description *
-                    </label>
-                    <textarea {...register('message')} rows={6}
-                      placeholder="Tell us what you're building — what problem it solves, who uses it, and what stage you're at..."
-                      style={{ ...inputStyle, resize:'vertical', minHeight:160 }}
-                    />
-                    {errors.message && <p style={{ fontFamily:"'Fragment Mono',monospace", fontSize:10, color:'#E07070', marginTop:6 }}>{errors.message.message}</p>}
-                  </div>
-
-                  {serverError && (
-                    <div style={{
-                      background:'rgba(224,112,112,0.08)',
-                      border:'1px solid rgba(224,112,112,0.25)',
-                      padding:'14px 18px',
-                      fontFamily:"'Space Grotesk',sans-serif",
-                      fontSize:13, color:'#E07070',
-                    }}>
-                      {serverError}
-                    </div>
-                  )}
-
-                  <button type="submit" disabled={isSubmitting}
-                    style={{
-                      display:'inline-flex', alignItems:'center', justifyContent:'center', gap:10,
-                      fontFamily:"'Space Grotesk',sans-serif",
-                      fontSize:11, fontWeight:700,
-                      letterSpacing:'0.2em', textTransform:'uppercase',
-                      color:'#0D1117',
-                      background: isSubmitting
-                        ? '#7A4D22'
-                        : 'linear-gradient(135deg,#B87333,#D4956A)',
-                      border:'none', padding:'20px 40px',
-                      cursor: isSubmitting ? 'not-allowed' : 'pointer',
-                      boxShadow:'0 0 40px rgba(184,115,51,0.25)',
-                      transition:'all 0.3s', width:'100%',
-                    }}
-                    onMouseEnter={e=>{ if(!isSubmitting) e.currentTarget.style.boxShadow='0 0 60px rgba(184,115,51,0.45)' }}
-                    onMouseLeave={e=>e.currentTarget.style.boxShadow='0 0 40px rgba(184,115,51,0.25)'}
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <div style={{ width:16, height:16, border:'2px solid rgba(13,17,23,0.3)', borderTopColor:'#0D1117', borderRadius:'50%', animation:'spin 0.7s linear infinite' }}/>
-                        Sending...
-                      </>
-                    ) : (
-                      <>Send Enquiry <ArrowUpRight size={15}/></>
-                    )}
-                  </button>
-                </form>
-              )}
-            </motion.div>
+            </motion.h1>
           </div>
         </div>
       </section>
 
-      <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+      {/* MAIN */}
+      <section className="form-pad" style={{background:T.bg,padding:'0 48px 120px',borderTop:`1px solid ${T.border}`}}>
+        <div className="container">
+          <div className="contact-grid" style={{display:'grid',gridTemplateColumns:'1fr 1.8fr',gap:80,paddingTop:80}}>
+
+            {/* LEFT INFO */}
+            <Reveal>
+              <p style={{fontFamily:"'Space Grotesk',sans-serif",fontSize:16,color:T.gray,lineHeight:1.85,fontWeight:300,marginBottom:56}}>
+                Tell us what you're building. We'll tell you if we're the right studio — honestly, even if the answer is no.
+              </p>
+              <div style={{display:'flex',flexDirection:'column',gap:28}}>
+                {[
+                  {icon:<MapPin size={14}/>, label:'Location',      val:'Coimbatore, Tamil Nadu, India'},
+                  {icon:<Mail size={14}/>,   label:'Email',         val:'hello@zentryhub.in'},
+                  {icon:<Clock size={14}/>,  label:'Response time', val:'Within 24 hours'},
+                ].map(item=>(
+                  <div key={item.label} style={{display:'flex',gap:16,alignItems:'flex-start'}}>
+                    <div style={{width:36,height:36,border:`1px solid ${T.border}`,display:'flex',alignItems:'center',justifyContent:'center',color:T.copper,flexShrink:0}}>
+                      {item.icon}
+                    </div>
+                    <div>
+                      <p style={{fontFamily:"'Fragment Mono',monospace",fontSize:9,color:T.grayD,letterSpacing:'0.18em',textTransform:'uppercase',marginBottom:4}}>{item.label}</p>
+                      <p style={{fontFamily:"'Space Grotesk',sans-serif",fontSize:14,color:T.gray}}>{item.val}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Reveal>
+
+            {/* RIGHT FORM */}
+            <Reveal delay={0.1}>
+              {submitted ? (
+                <motion.div initial={{opacity:0,scale:0.96}} animate={{opacity:1,scale:1}}
+                  style={{border:`1px solid rgba(82,183,136,0.3)`,background:'rgba(82,183,136,0.04)',padding:'56px 44px',textAlign:'center'}}>
+                  <CheckCircle size={40} color="#52B788" style={{marginBottom:20,display:'block',margin:'0 auto 20px'}}/>
+                  <h3 style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:40,letterSpacing:'0.04em',color:T.white,marginBottom:12,lineHeight:1}}>Message Received.</h3>
+                  <p style={{fontFamily:"'Space Grotesk',sans-serif",fontSize:15,color:T.gray,lineHeight:1.75,fontWeight:300}}>
+                    We've got your enquiry and will respond within 24 hours.
+                  </p>
+                </motion.div>
+              ) : (
+                <form onSubmit={handleSubmit(onSubmit)} style={{display:'flex',flexDirection:'column',gap:20}}>
+
+                  <div className="form-row" style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16}}>
+                    <Field label="Full Name *" error={errors.name?.message}>
+                      <input {...register('name')} placeholder="Your name"
+                        style={inputBase}
+                        onFocus={e=>e.target.style.borderColor='rgba(196,132,58,0.6)'}
+                        onBlur={e=>e.target.style.borderColor=T.border}
+                      />
+                    </Field>
+                    <Field label="Email *" error={errors.email?.message}>
+                      <input {...register('email')} type="email" placeholder="your@email.com"
+                        style={inputBase}
+                        onFocus={e=>e.target.style.borderColor='rgba(196,132,58,0.6)'}
+                        onBlur={e=>e.target.style.borderColor=T.border}
+                      />
+                    </Field>
+                  </div>
+
+                  <Field label="Service *" error={errors.service?.message}>
+                    <select {...register('service')} style={{...inputBase,cursor:'pointer'}}>
+                      <option value="">Select a service...</option>
+                      {SERVICES.map(s=><option key={s} value={s}>{s}</option>)}
+                    </select>
+                  </Field>
+
+                  <Field label="Budget Range">
+                    <select {...register('budget')} style={{...inputBase,cursor:'pointer'}}>
+                      <option value="">Select a range...</option>
+                      {BUDGETS.map(b=><option key={b} value={b}>{b}</option>)}
+                    </select>
+                  </Field>
+
+                  <Field label="Project Description *" error={errors.message?.message}>
+                    <textarea {...register('message')} rows={6}
+                      placeholder="Tell us what you're building — what problem it solves, who uses it, and what stage you're at..."
+                      style={{...inputBase,resize:'vertical',minHeight:148}}
+                      onFocus={e=>e.target.style.borderColor='rgba(196,132,58,0.6)'}
+                      onBlur={e=>e.target.style.borderColor=T.border}
+                    />
+                  </Field>
+
+                  {serverError && (
+                    <div style={{background:'rgba(224,112,112,0.07)',border:'1px solid rgba(224,112,112,0.25)',padding:'13px 16px',fontFamily:"'Space Grotesk',sans-serif",fontSize:13,color:'#E07070'}}>
+                      {serverError}
+                    </div>
+                  )}
+
+                  <button type="submit" disabled={isSubmitting} style={{
+                    display:'inline-flex',alignItems:'center',justifyContent:'center',gap:8,
+                    fontFamily:"'Space Grotesk',sans-serif",fontSize:11,fontWeight:700,
+                    letterSpacing:'0.18em',textTransform:'uppercase',
+                    color:T.bg,border:'none',
+                    background:isSubmitting?T.copperD:`linear-gradient(135deg,${T.copper},${T.copperL})`,
+                    padding:'16px',width:'100%',
+                    cursor:isSubmitting?'not-allowed':'pointer',
+                    boxShadow:`0 0 36px rgba(196,132,58,0.2)`,
+                    transition:'opacity 0.2s,transform 0.2s',
+                    marginTop:4,
+                  }}
+                    onMouseEnter={e=>{if(!isSubmitting){e.currentTarget.style.opacity='0.88';e.currentTarget.style.transform='translateY(-1px)'}}}
+                    onMouseLeave={e=>{e.currentTarget.style.opacity='1';e.currentTarget.style.transform='translateY(0)'}}
+                  >
+                    {isSubmitting ? (
+                      <div style={{width:16,height:16,border:'2px solid rgba(8,9,11,0.3)',borderTopColor:T.bg,borderRadius:'50%',animation:'spin 0.7s linear infinite'}}/>
+                    ) : (
+                      <><ArrowUpRight size={14}/> Send Enquiry</>
+                    )}
+                  </button>
+                </form>
+              )}
+            </Reveal>
+          </div>
+        </div>
+      </section>
     </>
   )
 }
