@@ -3,17 +3,36 @@ const prisma = require('../config/db')
 
 module.exports = async function authMiddleware(req, res, next) {
   try {
+    // Get token from cookie
     const token = req.cookies?.token
-    if (!token) return res.status(401).json({ error: 'Unauthorised — no token' })
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET)
-    const admin   = await prisma.adminUser.findUnique({ where: { id: decoded.adminId } })
+    if (!token) {
+      return res.status(401).json({ error: 'Unauthorised — no token' })
+    }
 
-    if (!admin) return res.status(401).json({ error: 'Unauthorised — admin not found' })
+    // Verify token
+    let decoded
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET)
+    } catch (e) {
+      return res.status(401).json({ error: 'Unauthorised — invalid or expired token' })
+    }
+
+    // Find admin
+    const admin = await prisma.adminUser.findUnique({
+      where: { id: decoded.adminId },
+      select: { id: true, email: true, created_at: true },
+    })
+
+    if (!admin) {
+      return res.status(401).json({ error: 'Unauthorised — admin not found' })
+    }
 
     req.admin = admin
     next()
-  } catch {
-    return res.status(401).json({ error: 'Unauthorised — invalid token' })
+
+  } catch (err) {
+    console.error('Auth middleware error:', err.message)
+    return res.status(500).json({ error: 'Server error in auth check' })
   }
 }
